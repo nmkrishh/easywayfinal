@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX Fitness - Transform Your Body. Ignite Your Mind.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --dark-bg: #0a0e27;
+            --dark-accent: #1a1f3a;
+            --neon-blue: #00d4ff;
+            --neon-pink: #ff006e;
+            --neon-green: #39ff14;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --neon-red: #ff0055;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 5px;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background: var(--neon-blue);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(10px, 10px);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            background: linear-gradient(rgba(10, 14, 39, 0.8), rgba(10, 14, 39, 0.8)), url('https://picsum.photos/1920/1080?random=1') center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-top: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255, 0, 110, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            z-index: 2;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-pink));
+            color: var(--dark-bg);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5), 0 0 40px rgba(255, 0, 110, 0.3);
+            animation: pulse 2s infinite;
+            letter-spacing: 1px;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.8), 0 0 60px rgba(255, 0, 110, 0.6);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(0, 212, 255, 0.5), 0 0 40px rgba(255, 0, 110, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(0, 212, 255, 0.8), 0 0 60px rgba(255, 0, 110, 0.6);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Sections */
+        section {
+            padding: 5rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        section h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            letter-spacing: 2px;
+            margin-bottom: 3rem;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        /* Classes Section */
+        .classes {
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.5), rgba(26, 31, 58, 0.5));
+        }
+
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .class-card {
+            background: rgba(26, 31, 58, 0.8);
+            border: 2px solid;
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .class-card:nth-child(1) { border-color: var(--neon-blue); animation-delay: 0.1s; }
+        .class-card:nth-child(2) { border-color: var(--neon-pink); animation-delay: 0.2s; }
+        .class-card:nth-child(3) { border-color: var(--neon-green); animation-delay: 0.3s; }
+        .class-card:nth-child(4) { border-color: var(--neon-blue); animation-delay: 0.4s; }
+        .class-card:nth-child(5) { border-color: var(--neon-pink); animation-delay: 0.5s; }
+        .class-card:nth-child(6) { border-color: var(--neon-green); animation-delay: 0.6s; }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .class-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+        }
+
+        .class-card:nth-child(2):hover {
+            box-shadow: 0 0 30px rgba(255, 0, 110, 0.4);
+        }
+
+        .class-card:nth-child(3):hover,
+        .class-card:nth-child(6):hover {
+            box-shadow: 0 0 30px rgba(57, 255, 20, 0.4);
+        }
+
+        .class-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .class-time {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .class-duration {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .class-difficulty {
+            display: flex;
+            gap: 0.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .star {
+            color: var(--neon-pink);
+            font-size: 1rem;
+        }
+
+        .class-instructor {
+            color: var(--neon-blue);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* Trainers Section */
+        .trainers {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.5), rgba(10, 14, 39, 0.5));
+        }
+
+        .trainers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .trainer-card {
+            background: rgba(26, 31, 58, 0.8);
+            border: 2px solid var(--neon-blue);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .trainer-card:nth-child(1) { animation-delay: 0.1s; }
+        .trainer-card:nth-child(2) { border-color: var(--neon-pink); animation-delay: 0.2s; }
+        .trainer-card:nth-child(3) { border-color: var(--neon-green); animation-delay: 0.3s; }
+        .trainer-card:nth-child(4) { border-color: var(--neon-blue); animation-delay: 0.4s; }
+
+        .trainer-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
+        }
+
+        .trainer-card:nth-child(2):hover {
+            box-shadow: 0 0 40px rgba(255, 0, 110, 0.5);
+        }
+
+        .trainer-card:nth-child(3):hover {
+            box-shadow: 0 0 40px rgba(57, 255, 20, 0.5);
+        }
+
+        .trainer-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .trainer-card:hover .trainer-image {
+            transform: scale(1.1);
+        }
+
+        .trainer-info {
+            padding: 1.5rem;
+        }
+
+        .trainer-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .trainer-specialty {
+            color: var(--neon-blue);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .trainer-experience {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .trainer-bio {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Pricing Section */
+        .pricing {
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.5), rgba(26, 31, 58, 0.5));
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .pricing-card {
+            background: rgba(26, 31, 58, 0.8);
+            border: 2px solid var(--neon-blue);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            animation: slideIn 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .pricing-card:nth-child(1) { animation-delay: 0.1s; }
+        .pricing-card:nth-child(2) { 
+            animation-delay: 0.2s;
+            border-color: var(--neon-pink);
+            transform: scale(1.05);
+        }
+        .pricing-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .pricing-card:hover {
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
+        }
+
+        .pricing-card:nth-child(2):hover {
+            box-shadow: 0 0 40px rgba(255, 0, 110, 0.5);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-blue));
+            color: var(--dark-bg);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+        }
+
+        .pricing-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            margin-top: 1rem;
+        }
+
+        .pricing-price {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .pricing-period {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .pricing-features li {
+            padding: 0.7rem 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .pricing-features li::before {
+            content: '✓';
+            color: var(--neon-green);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .pricing-features li.unavailable::before {
+            content: '✕';
+            color: var(--neon-red);
+        }
+
+        .pricing-features li.unavailable {
+            color: #666;
+        }
+
+        .pricing-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-pink));
+            color: var(--dark-bg);
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .pricing-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+        }
+
+        /* Form Section */
+        .signup {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.5), rgba(10, 14, 39, 0.5));
+        }
+
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(26, 31, 58, 0.8);
+            border: 2px solid var(--neon-blue);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.4);
+        }
+
+        .form-group select {
+            cursor: pointer;
+        }
+
+        .form-group select option {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+        }
+
+        .error-message {
+            color: var(--neon-red);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+            display: none;
+            animation: shake 0.3s ease;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .form-group input.error {
+            border-color: var(--neon-red);
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.4);
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-pink));
+            color: var(--dark-bg);
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .submit-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+        }
+
+        .submit-button:active {
+            transform: scale(0.98);
+        }
+
+        .success-message {
+            background: rgba(57, 255, 20, 0.2);
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+            font-weight: 600;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(10, 14, 39, 0.95);
+            border-top: 2px solid rgba(0, 212, 255, 0.3);
+            padding: 3rem 2rem 1rem;
+            margin-top: 5rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--neon-blue);
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--neon-blue);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 2px solid var(--neon-blue);
+            border-radius: 50%;
+            color: var(--neon-blue);
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .social-links a:hover {
+            background: var(--neon-blue);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(0, 212, 255, 0.1);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                background: rgba(10, 14, 39, 0.98);
+                padding: 2rem;
+                gap: 1rem;
+                border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .hero {
+                margin-top: 60px;
+            }
+
+            section {
+                padding: 3rem 1rem;
+            }
+
+            .classes-grid,
+            .trainers-grid,
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-card:nth-child(2) {
+                transform: scale(1);
+            }
+
+            .cta-button {
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.3rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 0.95rem;
+            }
+
+            section h2 {
+                font-size: 1.8rem;
+            }
+
+            .class-card,
+            .trainer-card,
+            .pricing-card {
+                padding: 1.5rem;
+            }
+
+            .pricing-price {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">APEX</div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#classes">Classes</a></li>
+            <li><a href="#trainers">Trainers</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Transform Your Body.<br>Ignite Your Mind.</h1>
+            <p>Join thousands of fitness enthusiasts on their journey to peak performance</p>
+            <button class="cta-button" onclick="document.getElementById('signup').scrollIntoView({behavior: 'smooth'})">Start Your Journey</button>
+        </div>
+    </section>
+
+    <!-- Classes Section -->
+    <section class="classes" id="classes">
+        <h2>Our Classes</h2>
+        <div class="classes-grid">
+            <div class="class-card">
+                <div class="class-name">HIIT Blast</div>
+                <div class="class-time">Mon, Wed, Fri - 6:00 PM</div>
+                <div class="class-duration">45 minutes</div>
+                <div class="class-difficulty">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                </div>
+                <div class="class-instructor">Instructor: Alex Rivera</div>
+            </div>
+
+            <div class="class-card">
+                <div class="class-name">Strength Training</div>
+                <div class="class-time">Tue, Thu, Sat - 7:00 PM</div>
+                <div class="class-duration">60 minutes</div>
+                <div class="class-difficulty">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                </div>
+                <div class="class-instructor">Instructor: Marcus Stone</div>
+            </div>
+
+            <div class="class-card">
+                <div class="class-name">Power Yoga</div>
+                <div class="class-time">Daily - 9:00 AM</div>
+                <div class="class-duration">50 minutes</div>
+                <div class="class-difficulty">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                </div>
+                <div class="class-instructor">Instructor: Sarah Chen</div>
+            </div>
+
+            <div class="class-card">
+                <div class="class-name">Spin Cycle</div>
+                <div class="class-time">Mon, Wed, Fri - 5:30 PM</div>
+                <div class="class-duration">45 minutes</div>
+                <div class="class-difficulty">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                </div>
+                <div class="class-instructor">Instructor: Jamie Lee</div>
+            </div>
+
+            <div class="class-card">
+                <div class="class-name">Boxing Fury</div>
+                <div class="class-time">Tue, Thu, Sat - 6:30 PM</div>
+                <div class="class-duration">55 minutes</div>
+                <div class="class-difficulty">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                </div>
+                <div class="class-instructor">Instructor: Tony Martinez</div>
+            </div>
+
+            <div class="class-card">
+                <div class="class-name">CrossFit Elite</div>
+                <div class="class-time">Daily - 6:00 PM</div>
+                <div class="class-duration">60 minutes</div>
+                <div class="class-difficulty">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                </div>
+                <div class="class-instructor">Instructor: Coach Emma</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trainers Section -->
+    <section class="trainers" id="trainers">
+        <h2>Meet Your Coaches</h2>
+        <div class="trainers-grid">
+            <div class="trainer-card">
+                <img src="https://picsum.photos/300/300?random=2" alt="Trainer" class="trainer-image">
+                <div class="trainer-info">
+                    <div class="trainer-name">Alex Rivera</div>
+                    <div class="trainer-specialty">HIIT &amp; Cardio Specialist</div>
+                    <div class="trainer-experience">8 years experience</div>
+                    <div class="trainer-bio">Certified personal trainer with a passion for high-intensity workouts and transforming lives through cardio excellence.</div>
+                </div>
+            </div>
+
+            <div class="trainer-card">
+                <img src="https://picsum.photos/300/300?random=3" alt="Trainer" class="trainer-image">
+                <div class="trainer-info">
+                    <div class="trainer-name">Marcus Stone</div>
+                    <div class="trainer-specialty">Strength &amp; Conditioning</div>
+                    <div class="trainer-experience">12 years experience</div>
+                    <div class="trainer-bio">Master of muscle building and strength training. Specializes in powerlifting and functional fitness programs.</div>
+                </div>
+            </div>
+
+            <div class="trainer-card">
+                <img src="https://picsum.photos/300/300?random=4" alt="Trainer" class="trainer-image">
+                <div class="trainer-info">
+                    <div class="trainer-name">Sarah Chen</div>
+                    <div class="trainer-specialty">Yoga &amp; Flexibility</div>
+                    <div class="trainer-experience">10 years experience</div>
+                    <div class="trainer-bio">Certified yoga instructor dedicated to helping clients achieve balance, flexibility, and inner peace through mindful movement.</div>
+                </div>
+            </div>
+
+            <div class="trainer-card">
+                <img src="https://picsum.photos/300/300?random=5" alt="Trainer" class="trainer-image">
+                <div class="trainer-info">
+                    <div class="trainer-name">Jamie Lee</div>
+                    <div class="trainer-specialty">Spin &amp; Endurance</div>
+                    <div class="trainer-experience">6 years experience</div>
+                    <div class="trainer-bio">High-energy spin instructor who motivates clients to push their limits and achieve cardiovascular excellence.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <h2>Choose Your Plan</h2>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <div class="pricing-title">Basic</div>
+                <div class="pricing-price">$29</div>
+                <div class="pricing-period">per month</div>
+                <ul class="pricing-features">
+                    <li>Gym access 24/7</li>
+                    <li>Basic equipment</li>
+                    <li>Locker room access</li>
+                    <li>1 class per week</li>
+                    <li class="unavailable">Personal trainer</li>
+                    <li class="unavailable">Nutrition plan</li>
+                    <li class="unavailable">Priority booking</li>
+                    <li class="unavailable">Guest passes</li>
+                </ul>
+                <button class="pricing-button">Get Started</button>
+            </div>
+
+            <div class="pricing-card">
+                <div class="popular-badge">MOST POPULAR</div>
+                <div class="pricing-title">Pro</div>
+                <div class="pricing-price">$79</div>
+                <div class="pricing-period">per month</div>
+                <ul class="pricing-features">
+                    <li>Gym access 24/7</li>
+                    <li>All equipment access</li>
+                    <li>Premium locker room</li>
+                    <li>Unlimited classes</li>
+                    <li>2 trainer sessions/month</li>
+                    <li>Basic nutrition plan</li>
+                    <li>Priority class booking</li>
+                    <li>2 guest passes/month</li>
+                </ul>
+                <button class="pricing-button">Get Started</button>
+            </div>
+
+            <div class="pricing-card">
+                <div class="pricing-title">Elite</div>
+                <div class="pricing-price">$149</div>
+                <div class="pricing-period">per month</div>
+                <ul class="pricing-features">
+                    <li>Gym access 24/7</li>
+                    <li>All equipment access</li>
+                    <li>VIP locker room</li>
+                    <li>Unlimited classes</li>
+                    <li>Unlimited trainer sessions</li>
+                    <li>Custom nutrition plan</li>
+                    <li>Priority everything</li>
+                    <li>Unlimited guest passes</li>
+                </ul>
+                <button class="pricing-button">Get Started</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sign-Up Section -->
+    <section class="signup" id="signup">
+        <h2>Start Your Transformation Today</h2>
+        <div class="form-container">
+            <div class="success-message" id="successMessage">
+                ✓ Welcome to APEX! Check your email for next steps.
+            </div>
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" placeholder="John Doe" required>
+                    <div class="error-message" id="nameError">Please enter a valid name</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                    <div class="error-message" id="emailError">Please enter a valid email</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" placeholder="(555) 123-4567" required>
+                    <div class="error-message" id="phoneError">Please enter a valid phone number</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="preferredClass">Preferred Class</label>
+                    <select id="preferredClass" name="preferredClass" required>
+                        <option value="">Select a class</option>
+                        <option value="hiit">HIIT Blast</option>
+                        <option value="strength">Strength Training</option>
+                        <option value="yoga">Power Yoga</option>
+                        <option value="spin">Spin Cycle</option>
+                        <option value="boxing">Boxing Fury</option>
+                        <option value="crossfit">CrossFit Elite</option>
+                    </select>
+                    <div class="error-message" id="classError">Please select a class</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+                    <div class="error-message" id="passwordError">Password must be at least 8 characters</div>
+                </div>
+
+                <button type="submit" class="submit-button">Join APEX Now</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>📞 (555) 123-4567</p>
+                <p>📧 info@apexfitness.com</p>
+                <p>📍 123 Fitness Ave, Gym City, GC 12345</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="#" title="Instagram">📷</a>
+                    <a href="#" title="Facebook">f</a>
+                    <a href="#" title="Twitter">𝕏</a>
+                    <a href="#" title="YouTube">▶</a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <p><a href="#">Privacy Policy</a></p>
+                <p><a href="#">Terms of Service</a></p>
+                <p><a href="#">FAQ</a></p>
+                <p><a href="#">Membership Agreement</a></p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 APEX Fitness. All rights reserved. Transform Your Body. Ignite Your Mind.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('navLinks');
+
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
+        // Close menu when link is clicked
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+
+        // Form Validation
+        const form = document.getElementById('signupForm');
+        const successMessage = document.getElementById('successMessage');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Reset messages
+            successMessage.classList.remove('show');
+            document.querySelectorAll('.error-message').forEach(msg => msg.classList.remove('show'));
+            document.querySelectorAll('input, select').forEach(field => field.classList.remove('error'));
+
+            // Validate fields
+            let isValid = true;
+
+            // Full Name validation
+            const fullName = document.getElementById('fullName');
+            if (fullName.value.trim().length < 2) {
+                showError('nameError', fullName);
+                isValid = false;
+            }
+
+            // Email validation
+            const email = document.getElementById('email');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.value)) {
+                showError('emailError', email);
+                isValid = false;
+            }
+
+            // Phone validation
+            const phone = document.getElementById('phone');
+            const phoneRegex = /^[\d\s\-\(\)]+$/;
+            if (!phoneRegex.test(phone.value) || phone.value.replace(/\D/g, '').length < 10) {
+                showError('phoneError', phone);
+                isValid = false;
+            }
+
+            // Class selection validation
+            const preferredClass = document.getElementById('preferredClass');
+            if (!preferredClass.value) {
+                showError('classError', preferredClass);
+                isValid = false;
+            }
+
+            // Password validation
+            const password = document.getElementById('password');
+            if (password.value.length < 8) {
+                showError('passwordError', password);
+                isValid = false;
+            }
+
+            // If valid, show success message and reset form
+            if (isValid) {
+                successMessage.classList.add('show');
+                form.reset();
+                setTimeout(() => {
+                    successMessage.classList.remove('show');
+                }, 5000);
+            }
+        });
+
+        function showError(errorId, field) {
+            document.getElementById(errorId).classList.add('show');
+            field.classList.add('error');
+        }
+
+        // Real-time validation on input
+        document.querySelectorAll('input, select').forEach(field => {
+            field.addEventListener('focus', () => {
+                field.classList.remove('error');
+                const errorMsg = field.parentElement.querySelector('.error-message');
+                if (errorMsg) errorMsg.classList.remove('show');
+            });
+        });
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards
+        document.querySelectorAll('.class-card, .trainer-card, .pricing-card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

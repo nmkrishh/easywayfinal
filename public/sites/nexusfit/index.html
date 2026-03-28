@@ -1,0 +1,2647 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS FITNESS | High-Intensity Urban Gym</title>
+    <meta name="description" content="Premium high-intensity gym with neon-lit workouts, expert trainers, and 24/7 access. Join the fitness revolution.">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        /* ===== CSS VARIABLES ===== */
+        :root {
+            --bg: #0a0a0a;
+            --surface: #111111;
+            --surface-light: #1a1a1a;
+            --border: #222222;
+            --text: #f0f0f0;
+            --text-secondary: #cccccc;
+            --muted: #888888;
+            --accent: #39ff14; /* Neon Green */
+            --accent-glow: rgba(57, 255, 20, 0.4);
+            --accent2: #00d4ff; /* Electric Blue */
+            --accent2-glow: rgba(0, 212, 255, 0.4);
+            --danger: #ff4141;
+            --success: #39ff14;
+            --transition: all 0.3s ease;
+            --font-body: 'Inter', sans-serif;
+            --font-display: 'Oswald', sans-serif;
+            --max-width: 1400px;
+            --header-height: 80px;
+        }
+
+        [data-theme="light"] {
+            --bg: #f5f5f5;
+            --surface: #ffffff;
+            --surface-light: #f0f0f0;
+            --border: #e5e5e5;
+            --text: #0a0a0a;
+            --text-secondary: #333333;
+            --muted: #666666;
+            --accent: #39ff14;
+            --accent-glow: rgba(57, 255, 20, 0.2);
+            --accent2: #00d4ff;
+            --accent2-glow: rgba(0, 212, 255, 0.2);
+        }
+
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        button, input, select, textarea {
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        /* ===== TYPOGRAPHY ===== */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 6rem);
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        h3 {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            margin: 0.5rem auto 0;
+            border-radius: 2px;
+        }
+
+        /* ===== LAYOUT ===== */
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        section {
+            padding: 6rem 0;
+            position: relative;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2rem;
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            color: var(--bg);
+            position: relative;
+            overflow: hidden;
+            transform: translateZ(0);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover {
+            transform: scale(1.03) translateY(-2px);
+            box-shadow: 0 10px 20px -5px var(--accent-glow);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent);
+            color: var(--bg);
+            box-shadow: 0 10px 20px -5px var(--accent-glow);
+        }
+
+        /* ===== HEADER & NAV ===== */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            z-index: 1000;
+            transition: var(--transition);
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        [data-theme="light"] header {
+            background: rgba(245, 245, 245, 0.85);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        nav ul {
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transition: 0.3s;
+            transform: translateX(-50%);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 5px;
+        }
+
+        .nav-toggle span {
+            width: 25px;
+            height: 2px;
+            background: var(--text);
+            transition: var(--transition);
+        }
+
+        /* ===== DARK/LIGHT TOGGLE ===== */
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+            width: 60px;
+            height: 30px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 2px;
+            transition: var(--transition);
+        }
+
+        .theme-toggle-circle {
+            width: 26px;
+            height: 26px;
+            background: var(--accent);
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: var(--bg);
+        }
+
+        [data-theme="light"] .theme-toggle-circle {
+            transform: translateX(30px);
+            background: var(--accent2);
+        }
+
+        .theme-toggle svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        /* ===== HERO SECTION ===== */
+        #hero {
+            position: relative;
+            height: 100vh;
+            min-height: 700px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        #hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, var(--bg) 90%);
+            z-index: 1;
+        }
+
+        .floating-shape {
+            position: absolute;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 20s infinite linear;
+        }
+
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            right: 5%;
+            animation-duration: 25s;
+        }
+
+        .shape-2 {
+            width: 150px;
+            height: 150px;
+            bottom: 20%;
+            left: 10%;
+            border-color: var(--accent2);
+            animation-duration: 18s;
+            animation-direction: reverse;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-100vh) rotate(360deg); }
+        }
+
+        /* ===== CLASS SCHEDULE ===== */
+        .schedule-filters {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.85rem;
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .schedule-table th {
+            background: var(--surface-light);
+            padding: 1rem;
+            text-align: left;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .schedule-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .schedule-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .schedule-table tr:hover {
+            background: rgba(57, 255, 20, 0.05);
+        }
+
+        .class-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--accent2);
+            color: var(--bg);
+            font-size: 0.75rem;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .availability {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .availability-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--danger);
+        }
+
+        .availability-indicator.open {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        .book-btn {
+            padding: 0.4rem 1rem;
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .book-btn:hover {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .mobile-schedule-view {
+            display: none;
+        }
+
+        /* ===== TRAINER CARDS (3D FLIP) ===== */
+        .trainers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            perspective: 1000px;
+        }
+
+        .trainer-card {
+            position: relative;
+            height: 450px;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+        .trainer-card:hover {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .card-front {
+            background: var(--surface);
+        }
+
+        .card-front img {
+            width: 100%;
+            height: 60%;
+            object-fit: cover;
+        }
+
+        .card-front .info {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .card-front .name {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-front .specialty {
+            font-size: 0.9rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, var(--surface), var(--surface-light));
+            transform: rotateY(180deg);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 2px solid var(--accent);
+        }
+
+        .card-back h4 {
+            color: var(--accent2);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .card-back p {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-back .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(57, 255, 20, 0.1);
+            border-radius: 4px;
+        }
+
+        .stat-value {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* ===== PRICING ===== */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2.5rem;
+            position: relative;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .pricing-card.featured {
+            border: 2px solid var(--accent);
+            background: linear-gradient(to bottom, var(--surface), rgba(57, 255, 20, 0.05));
+        }
+
+        .pricing-card.featured::before {
+            content: 'POPULAR';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: var(--bg);
+            padding: 0.3rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .plan-name {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .plan-price {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .plan-price span {
+            font-size: 1rem;
+            color: var(--muted);
+        }
+
+        .plan-features {
+            flex-grow: 1;
+            margin-bottom: 2rem;
+        }
+
+        .plan-features li {
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .plan-features li::before {
+            content: '✓';
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .pricing-card .btn {
+            width: 100%;
+        }
+
+        /* ===== SIGN-UP FORM (MULTI-STEP) ===== */
+        .signup-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 3rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--border);
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--surface-light);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-family: var(--font-display);
+            font-weight: 700;
+            transition: var(--transition);
+        }
+
+        .step.active .step-number {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .step.completed .step-number {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+        }
+
+        .step-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+        }
+
+        .step.active .step-label {
+            color: var(--text);
+        }
+
+        .form-step {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(57, 255, 20, 0.2);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .form-group.error .form-control {
+            border-color: var(--danger);
+        }
+
+        .form-group.error .error-message {
+            display: block;
+        }
+
+        /* ===== FAQ ACCORDION ===== */
+        .faq-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--surface);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            color: var(--text);
+            transition: var(--transition);
+        }
+
+        .faq-question:hover {
+            background: rgba(57, 255, 20, 0.05);
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+            color: var(--accent);
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-question::after {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            color: var(--text-secondary);
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 0 1.5rem 1.5rem;
+            max-height: 500px;
+        }
+
+        /* ===== TESTIMONIALS CAROUSEL ===== */
+        .testimonials-carousel {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .testimonial-card {
+            min-width: 100%;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        .testimonial-content {
+            background: var(--surface);
+            padding: 2.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .testimonial-content::before {
+            content: '"';
+            position: absolute;
+            top: 1rem;
+            left: 1.5rem;
+            font-size: 4rem;
+            color: var(--accent);
+            opacity: 0.2;
+            font-family: var(--font-display);
+            line-height: 1;
+        }
+
+        .testimonial-text {
+            font-size: 1.2rem;
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .testimonial-author {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .author-name {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--accent2);
+        }
+
+        .author-role {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .carousel-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            cursor: pointer;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .carousel-btn:hover {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .dot.active {
+            background: var(--accent);
+            transform: scale(1.2);
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            background: var(--surface);
+            padding: 4rem 0 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-col h4 {
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: var(--muted);
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--accent2);
+            padding-left: 5px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        /* ===== SCROLL ANIMATIONS ===== */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .stagger > * {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .stagger.visible > *:nth-child(1) { transition-delay: 0.1s; }
+        .stagger.visible > *:nth-child(2) { transition-delay: 0.2s; }
+        .stagger.visible > *:nth-child(3) { transition-delay: 0.3s; }
+        .stagger.visible > *:nth-child(4) { transition-delay: 0.4s; }
+
+        .stagger.visible > * {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== MOBILE RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .nav-menu {
+                position: fixed;
+                top: var(--header-height);
+                left: 0;
+                width: 100%;
+                background: var(--surface);
+                flex-direction: column;
+                padding: 2rem;
+                gap: 1.5rem;
+                transform: translateY(-150%);
+                transition: transform 0.4s ease;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            }
+
+            .nav-menu.active {
+                transform: translateY(0);
+            }
+
+            .nav-toggle {
+                display: flex;
+            }
+
+            .mobile-schedule-view {
+                display: block;
+            }
+
+            .desktop-schedule-view {
+                display: none;
+            }
+
+            .schedule-table {
+                display: none;
+            }
+
+            .mobile-schedule-item {
+                background: var(--surface);
+                border-radius: 8px;
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+                border: 1px solid var(--border);
+            }
+
+            .mobile-schedule-item .class-info {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.5rem;
+            }
+
+            .mobile-schedule-item .time {
+                color: var(--accent);
+                font-family: var(--font-display);
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .signup-container {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .progress-bar .step-label {
+                font-size: 0.7rem;
+            }
+
+            .step-number {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* ===== UTILITY ===== */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-2 { margin-top: 2rem; }
+        .mb-2 { margin-bottom: 2rem; }
+
+        .hidden {
+            display: none;
+        }
+
+        .neon-text {
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        /* ===== RAZORPAY STYLES ===== */
+        .razorpay-payment-button {
+            display: none;
+        }
+
+        .payment-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .payment-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .payment-modal {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+        }
+
+        .payment-modal .close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--muted);
+        }
+
+        .payment-modal .close:hover {
+            color: var(--text);
+        }
+
+        .payment-success {
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .payment-loading {
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+
+        .payment-details {
+            background: var(--surface-light);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        .payment-details strong {
+            color: var(--accent2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark/Light Theme Toggle -->
+    <div class="theme-toggle" id="themeToggle" role="button" aria-label="Toggle dark/light mode">
+        <div class="theme-toggle-circle">
+            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.25a.75.75 0 01.75.75 2.25 2.25 0 011.98 2.178A4.5 4.5 0 0116.28 5.75c0 .854-.158 1.678-.444 2.451a.75.75 0 01-.901 1.056A6.75 6.75 0 0112 21a.75.75 0 01-.75-.75v-1.5a.75.75 0 01-.75-.75A4.5 4.5 0 008.28 5.75a4.5 4.5 0 00-4.04 3.178A4.5 4.5 0 014 10.5a.75.75 0 01-1.5 0 .75.75 0 01.75-.75A2.25 2.25 0 016 7.5a2.25 2.25 0 012.25-2.25c0-.854.158-1.678.444-2.451a.75.75 0 01.901-1.056A6.75 6.75 0 0012 3a6.75 6.75 0 006.75 6.75c.283 0 .553-.034.812-.097a.75.75 0 01.901 1.056A2.25 2.25 0 0116.28 3.75c0 .854-.158 1.678-.444 2.451a.75.75 0 01.75.75z"/>
+            </svg>
+            <svg class="moon-icon hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.25a.75.75 0 01.75.75 4.5 4.5 0 019.44 0 .75.75 0 01-.75.75 5.25 5.25 0 01-9.69 0 .75.75 0 01-.75-.75zM12 15a.75.75 0 01.75.75 2.25 2.25 0 001.98 2.178A4.5 4.5 0 0016.28 17.75c0 .854-.158 1.678-.444 2.451a.75.75 0 01-.901 1.056A6.75 6.75 0 0012 21a.75.75 0 01-.75-.75V15z"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="container nav-container">
+            <a href="#" class="logo">NEXUS<span>FITNESS</span></a>
+            <div class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <nav>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="#hero">Home</a></li>
+                    <li><a href="#schedule">Classes</a></li>
+                    <li><a href="#trainers">Trainers</a></li>
+                    <li><a href="#pricing">Membership</a></li>
+                    <li><a href="#signup">Join Now</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero">
+        <canvas id="hero-canvas"></canvas>
+        <div class="hero-overlay"></div>
+        <div class="floating-shape shape-1"></div>
+        <div class="floating-shape shape-2"></div>
+        <div class="container">
+            <div class="hero-content fade-up" id="heroContent">
+                <span class="hero-subtitle">URBAN FITNESS REVOLUTION</span>
+                <h1>Unleash Your <span class="neon-text">Inner Beast</span></h1>
+                <p class="hero-description">Experience high-intensity workouts in a neon-lit, nightclub atmosphere. 24/7 access, world-class trainers, and cutting-edge equipment. Your transformation starts here.</p>
+                <div class="hero-buttons">
+                    <a href="#signup" class="btn" id="startTrialBtn">Start Free Trial</a>
+                    <a href="#schedule" class="btn btn-secondary">View Schedule</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Class Schedule -->
+    <section id="schedule" class="fade-up">
+        <div class="container">
+            <h2 class="section-title">Class Schedule</h2>
+            
+            <!-- Filters -->
+            <div class="schedule-filters">
+                <button class="filter-btn active" data-filter="all">All Classes</button>
+                <button class="filter-btn" data-filter="hiit">HIIT</button>
+                <button class="filter-btn" data-filter="strength">Strength</button>
+                <button class="filter-btn" data-filter="boxing">Boxing</button>
+                <button class="filter-btn" data-filter="yoga">Yoga</button>
+                <button class="filter-btn" data-filter="cycling">Cycling</button>
+            </div>
+
+            <!-- Desktop Table -->
+            <div class="desktop-schedule-view">
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Instructor</th>
+                            <th>Time</th>
+                            <th>Duration</th>
+                            <th>Availability</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schedule-body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile View -->
+            <div class="mobile-schedule-view" id="mobileSchedule">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Trainers -->
+    <section id="trainers" class="fade-up">
+        <div class="container">
+            <h2 class="section-title">Elite Trainers</h2>
+            <div class="trainers-grid stagger">
+                <!-- Trainer 1 -->
+                <div class="trainer-card">
+                    <div class="card-face card-front">
+                        <img src="https://picsum.photos/seed/trainer1/400/500" alt="Personal Trainer">
+                        <div class="info">
+                            <h3 class="name">Marcus "The Hammer" Cole</h3>
+                            <p class="specialty">Strength & Conditioning</p>
+                        </div>
+                    </div>
+                    <div class="card-face card-back">
+                        <h4>PHILOSOPHY</h4>
+                        <p>"Build a body that doesn't need excuses. Focus on progressive overload and mental toughness."</p>
+                        <div class="stats">
+                            <div class="stat">
+                                <div class="stat-value">12</div>
+                                <div class="stat-label">Years</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">500+</div>
+                                <div class="stat-label">Clients</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">3</div>
+                                <div class="stat-label">Champions</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">CPT</div>
+                                <div class="stat-label">Cert</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trainer 2 -->
+                <div class="trainer-card">
+                    <div class="card-face card-front">
+                        <img src="https://picsum.photos/seed/trainer2/400/500" alt="Boxing Coach">
+                        <div class="info">
+                            <h3 class="name">Elena "Fury" Vasquez</h3>
+                            <p class="specialty">Boxing & HIIT</p>
+                        </div>
+                    </div>
+                    <div class="card-face card-back">
+                        <h4>PHILOSOPHY</h4>
+                        <p>"Boxing is the ultimate full-body workout. It builds confidence, agility, and relentless endurance."</p>
+                        <div class="stats">
+                            <div class="stat">
+                                <div class="stat-value">8</div>
+                                <div class="stat-label">Years</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">300+</div>
+                                <div class="stat-label">Fights</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">2</div>
+                                <div class="stat-label">Titles</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">BPC</div>
+                                <div class="stat-label">Cert</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trainer 3 -->
+                <div class="trainer-card">
+                    <div class="card-face card-front">
+                        <img src="https://picsum.photos/seed/trainer3/400/500" alt="Yoga Instructor">
+                        <div class="info">
+                            <h3 class="name">Jasmine "Zen" Lee</h3>
+                            <p class="specialty">Yoga & Mobility</p>
+                        </div>
+                    </div>
+                    <div class="card-face card-back">
+                        <h4>PHILOSOPHY</h4>
+                        <p>"Strength meets flexibility. Yoga enhances recovery, prevents injury, and builds a powerful mind-body connection."</p>
+                        <div class="stats">
+                            <div class="stat">
+                                <div class="stat-value">10</div>
+                                <div class="stat-label">Years</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">1000+</div>
+                                <div class="stat-label">Students</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">5</div>
+                                <div class="stat-label">Styles</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">RYT</div>
+                                <div class="stat-label">Cert</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="fade-up">
+        <div class="container">
+            <h2 class="section-title">Membership Plans</h2>
+            <div class="pricing-grid stagger">
+                <!-- Basic -->
+                <div class="pricing-card">
+                    <h3 class="plan-name">Basic</h3>
+                    <div class="plan-price">$49<span>/month</span></div>
+                    <ul class="plan-features">
+                        <li>24/7 Gym Access</li>
+                        <li>Locker Room & Showers</li>
+                        <li>Free Fitness Assessment</li>
+                        <li>Access to Basic Equipment</li>
+                        <li>Mobile App Tracking</li>
+                        <li>2 Group Classes/Month</li>
+                        <li>No Contract</li>
+                    </ul>
+                    <button class="btn btn-secondary" id="basicBtn">Select Plan</button>
+                </div>
+
+                <!-- Pro (Featured) -->
+                <div class="pricing-card featured">
+                    <h3 class="plan-name">Pro</h3>
+                    <div class="plan-price">$99<span>/month</span></div>
+                    <ul class="plan-features">
+                        <li>All Basic Features</li>
+                        <li>Unlimited Group Classes</li>
+                        <li>Free 1-Hand Training Session</li>
+                        <li>Priority Class Booking</li>
+                        <li>Nutrition Planning</li>
+                        <li>Sauna & Steam Room Access</li>
+                        <li>Monthly Progress Review</li>
+                    </ul>
+                    <button class="btn" id="proBtn">Select Plan</button>
+                </div>
+
+                <!-- Elite -->
+                <div class="pricing-card">
+                    <h3 class="plan-name">Elite</h3>
+                    <div class="plan-price">$199<span>/month</span></div>
+                    <ul class="plan-features">
+                        <li>All Pro Features</li>
+                        <li>4 Personal Training Sessions/Month</li>
+                        <li>Customized Meal Plans</li>
+                        <li>Exclusive Workshops</li>
+                        <li>VIP Guest Passes (2)</li>
+                        <li>Priority Support</li>
+                        <li>Merchandise Bundle</li>
+                    </ul>
+                    <button class="btn btn-secondary" id="eliteBtn">Select Plan</button>
+                </div>
+            </div>
+
+            <div class="text-center mt-2">
+                <p>Add personal training sessions: <strong>$75/session</strong> (Package discounts available)</p>
+                <p class="muted">All plans include 24/7 access, towel service, and premium amenities. Annual billing saves 15%.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sign-up Form -->
+    <section id="signup" class="fade-up">
+        <div class="container">
+            <h2 class="section-title">Join The Revolution</h2>
+            <div class="signup-container">
+                <div class="progress-bar">
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Personal</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Plan</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Payment</div>
+                    </div>
+                    <div class="step" data-step="4">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Complete</div>
+                    </div>
+                </div>
+
+                <form id="signupForm">
+                    <!-- Step 1: Personal Info -->
+                    <div class="form-step active" data-step="1">
+                        <div class="form-group">
+                            <label for="firstName">First Name *</label>
+                            <input type="text" id="firstName" class="form-control" required>
+                            <div class="error-message">Please enter your first name.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name *</label>
+                            <input type="text" id="lastName" class="form-control" required>
+                            <div class="error-message">Please enter your last name.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" class="form-control" required>
+                            <div class="error-message">Please enter a valid email.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone *</label>
+                            <input type="tel" id="phone" class="form-control" required>
+                            <div class="error-message">Please enter your phone number.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="dob">Date of Birth *</label>
+                            <input type="date" id="dob" class="form-control" required>
+                            <div class="error-message">Please enter your date of birth.</div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn" disabled>Next Step</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Plan Selection -->
+                    <div class="form-step" data-step="2">
+                        <div class="form-group">
+                            <label>Select Membership Plan *</label>
+                            <div class="pricing-options">
+                                <label class="plan-option">
+                                    <input type="radio" name="plan" value="basic" required>
+                                    <div class="option-card">
+                                        <h4>Basic</h4>
+                                        <p>$49/month</p>
+                                    </div>
+                                </label>
+                                <label class="plan-option">
+                                    <input type="radio" name="plan" value="pro" required>
+                                    <div class="option-card">
+                                        <h4>Pro</h4>
+                                        <p>$99/month</p>
+                                    </div>
+                                </label>
+                                <label class="plan-option">
+                                    <input type="radio" name="plan" value="elite" required>
+                                    <div class="option-card">
+                                        <h4>Elite</h4>
+                                        <p>$199/month</p>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="error-message">Please select a membership plan.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="addons">Add-ons</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="addons" value="pt"> Personal Training (1 session - $75)</label>
+                                <label><input type="checkbox" name="addons" value="nutrition"> Nutrition Plan (+$30/month)</label>
+                                <label><input type="checkbox" name="addons" value="guest"> Guest Passes (+$20/month)</label>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+                            <button type="button" class="btn" onclick="nextStep()">Next Step</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Payment -->
+                    <div class="form-step" data-step="3">
+                        <div class="form-group">
+                            <label for="cardName">Name on Card *</label>
+                            <input type="text" id="cardName" class="form-control" required>
+                            <div class="error-message">Please enter the name on the card.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cardNumber">Card Number *</label>
+                            <input type="text" id="cardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                            <div class="error-message">Please enter a valid card number.</div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label for="expiry">Expiry (MM/YY) *</label>
+                                <input type="text" id="expiry" class="form-control" placeholder="MM/YY" maxlength="5" required>
+                                <div class="error-message">Invalid expiry.</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cvv">CVV *</label>
+                                <input type="text" id="cvv" class="form-control" placeholder="123" maxlength="3" required>
+                                <div class="error-message">Invalid CVV.</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="waiver" required>
+                                I agree to the terms and conditions and liability waiver *
+                            </label>
+                            <div class="error-message">You must accept the waiver.</div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+                            <button type="button" class="btn" onclick="submitForm()">Complete Sign-up</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Complete -->
+                    <div class="form-step" data-step="4">
+                        <div class="text-center" style="padding: 3rem 0;">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <h3 style="margin-top: 1rem; color: var(--accent);">Welcome to NEXUS!</h3>
+                            <p>Your membership is now active. Check your email for confirmation and next steps.</p>
+                            <p><strong>Member ID: </strong><span id="memberId"></span></p>
+                            <div class="mt-2">
+                                <a href="#schedule" class="btn">Book Your First Class</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" class="fade-up" style="background: var(--surface);">
+        <div class="container">
+            <div class="stagger">
+                <h2 class="section-title">About NEXUS</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; align-items: center;">
+                    <div>
+                        <h3 style="color: var(--accent2);">More Than a Gym. A Lifestyle.</h3>
+                        <p>Founded in 2018, NEXUS FITNESS has redefined urban training. Our neon-lit, high-energy environment blends cutting-edge equipment with nightclub vibes, creating a space where motivation never ends.</p>
+                        <p>We believe fitness should be exhilarating, not a chore. Our 24/7 access, community-driven classes, and elite trainers push you beyond limits you thought existed.</p>
+                        <p><strong>Our Core Values:</strong> Intensity, Community, Innovation, and Results.</p>
+                    </div>
+                    <div>
+                        <img src="https://picsum.photos/seed/gyminterior/600/400" alt="NEXUS Gym Interior" style="border-radius: 8px; border: 2px solid var(--accent);">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="fade-up">
+        <div class="container">
+            <h2 class="section-title">Get In Touch</h2>
+            <div class="stagger" style="max-width: 800px; margin: 0 auto;">
+                <div class="form-group">
+                    <label for="contactName">Name</label>
+                    <input type="text" id="contactName" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="contactEmail">Email</label>
+                    <input type="email" id="contactEmail" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="contactMessage">Message</label>
+                    <textarea id="contactMessage" class="form-control" rows="5"></textarea>
+                </div>
+                <button class="btn" onclick="alert('Message sent! We\'ll respond within 24 hours.')">Send Message</button>
+            </div>
+            <div class="text-center mt-2">
+                <p><strong>Phone:</strong> <a href="tel:+15551234567">(555) 123-4567</a></p>
+                <p><strong>Email:</strong> <a href="mailto:info@nexusfitness.com">info@nexusfitness.com</a></p>
+                <p><strong>Address:</strong> 123 Neon Avenue, Downtown, Metro City</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="fade-up" style="background: var(--surface);">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question">What are your opening hours?</div>
+                    <div class="faq-answer">
+                        <p>NEXUS is open 24/7, 365 days a year. Our front desk is staffed from 5 AM to 10 PM daily for assistance.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Do I need to sign a long-term contract?</div>
+                    <div class="faq-answer">
+                        <p>No! All our memberships are month-to-month. You can cancel anytime with 14 days notice. Annual plans save 15% but require a 12-month commitment.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Can I freeze my membership?</div>
+                    <div class="faq-answer">
+                        <p>Yes, you can freeze your membership for up to 3 months per year for medical or travel reasons. A small administrative fee applies.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Are there lockers and showers?</div>
+                    <div class="faq-answer">
+                        <p>Absolutely. We provide day-use and permanent lockers, premium showers with toiletries, towel service, and secure changing areas.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Do I need to book classes in advance?</div>
+                    <div class="faq-answer">
+                        <p>We recommend booking 24 hours ahead for popular classes. Basic members get 2 class credits/month, Pro and Elite have unlimited access.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Is there a minimum age requirement?</div>
+                    <div class="faq-answer">
+                        <p>Members must be at least 16 years old. Those under 18 require parental consent and must complete a youth orientation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="testimonials" class="fade-up">
+        <div class="container">
+            <h2 class="section-title">Member Stories</h2>
+            <div class="testimonials-carousel">
+                <div class="carousel-track" id="carouselTrack">
+                    <div class="testimonial-card">
+                        <div class="testimonial-content">
+                            <p class="testimonial-text">"NEXUS changed my life. The energy is insane, the trainers are world-class, and the results speak for themselves. I've lost 40 lbs and gained confidence I never had."</p>
+                            <div class="testimonial-author">
+                                <span class="author-name">Sarah J.</span>
+                                <span class="author-role">Pro Member since 2021</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-content">
+                            <p class="testimonial-text">"The boxing classes with Elena are next level. I came in scared to throw a punch and left feeling like a warrior. The community here is family."</p>
+                            <div class="testimonial-author">
+                                <span class="author-name">Mike T.</span>
+                                <span class="author-role">Elite Member</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-content">
+                            <p class="testimonial-text">"24/7 access means I can train around my crazy schedule. The neon vibe at 5 AM is oddly motivating. Best investment I've made for my health."</p>
+                            <div class="testimonial-author">
+                                <span class="author-name">Alex R.</span>
+                                <span class="author-role">Basic Member</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-nav">
+                    <button class="carousel-btn" id="prevBtn" aria-label="Previous testimonial">&#10094;</button>
+                    <button class="carousel-btn" id="nextBtn" aria-label="Next testimonial">&#10095;</button>
+                </div>
+                <div class="carousel-dots" id="carouselDots"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>NEXUS FITNESS</h4>
+                    <p>High-intensity, neon-lit workouts for the urban warrior. 24/7 access. No excuses.</p>
+                    <div class="social-links mt-2">
+                        <a href="#" aria-label="Facebook"><svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+                        <a href="#" aria-label="Instagram"><svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                        <a href="#" aria-label="Twitter"><svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="#hero">Home</a></li>
+                        <li><a href="#schedule">Class Schedule</a></li>
+                        <li><a href="#trainers">Trainers</a></li>
+                        <li><a href="#pricing">Membership</a></li>
+                        <li><a href="#signup">Join Now</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Classes</h4>
+                    <ul class="footer-links">
+                        <li><a href="#schedule">HIIT Blast</a></li>
+                        <li><a href="#schedule">Boxing Fundamentals</a></li>
+                        <li><a href="#schedule"> strength & Conditioning</a></li>
+                        <li><a href="#schedule">Vinyasa Yoga</a></li>
+                        <li><a href="#schedule">Indoor Cycling</a></li>
+                        <li><a href="#schedule">Core & Mobility</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul class="footer-links">
+                        <li>123 Neon Avenue</li>
+                        <li>Downtown, Metro City</li>
+                        <li>(555) 123-4567</li>
+                        <li>info@nexusfitness.com</li>
+                        <li>24/7 Support: (555) 987-6543</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2023 NEXUS FITNESS. All rights reserved. | <a href="#" style="color: var(--accent2);">Privacy Policy</a> | <a href="#" style="color: var(--accent2);">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Payment Overlay -->
+    <div class="payment-overlay" id="paymentOverlay">
+        <div class="payment-modal">
+            <span class="close" id="closePayment">&times;</span>
+            <div class="payment-loading" id="paymentStatus">Processing payment...</div>
+            <div class="payment-details" id="paymentDetails"></div>
+            <div id="razorpayContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        // ===== THEME TOGGLE =====
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const sunIcon = document.querySelector('.sun-icon');
+        const moonIcon = document.querySelector('.moon-icon');
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+
+            if (newTheme === 'light') {
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            } else {
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            }
+
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        if (savedTheme === 'light') {
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        }
+
+        // ===== MOBILE NAV =====
+        const navToggle = document.getElementById('navToggle');
+        const navMenu = document.getElementById('navMenu');
+
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+
+        // Close mobile nav when clicking a link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+            });
+        });
+
+        // ===== THREE.JS HERO BACKGROUND =====
+        let scene, camera, renderer, particles;
+
+        function initThree() {
+            const canvas = document.getElementById('hero-canvas');
+            if (!canvas) {
+                console.error('Hero canvas not found');
+                return;
+            }
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            // Particles
+            const geometry = new THREE.BufferGeometry();
+            const vertices = [];
+            const colors = [];
+            const color1 = new THREE.Color(0x39ff14); // neon green
+            const color2 = new THREE.Color(0x00d4ff); // electric blue
+
+            for (let i = 0; i < 2000; i++) {
+                const x = (Math.random() - 0.5) * 20;
+                const y = (Math.random() - 0.5) * 20;
+                const z = (Math.random() - 0.5) * 20;
+                vertices.push(x, y, z);
+
+                const mixedColor = Math.random() > 0.5 ? color1 : color2;
+                colors.push(mixedColor.r, mixedColor.g, mixedColor.b);
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.15,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                sizeAttenuation: true
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            camera.position.z = 5;
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            particles.rotation.y += 0.001;
+            particles.rotation.x += 0.0005;
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Initialize Three.js after DOM loads
+        document.addEventListener('DOMContentLoaded', initThree);
+
+        // ===== HERO 3D TILT EFFECT =====
+        const heroSection = document.getElementById('hero');
+        const heroContent = document.getElementById('heroContent');
+
+        heroSection.addEventListener('mousemove', (e) => {
+            const rect = heroSection.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const rotateX = ((y - centerY) / centerY) * -10; // limit tilt angle
+            const rotateY = ((x - centerX) / centerX) * 10;
+
+            heroContent.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+
+        heroSection.addEventListener('mouseleave', () => {
+            heroContent.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+        });
+
+        // ===== SCROLL ANIMATIONS =====
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-up, .stagger').forEach(el => {
+            observer.observe(el);
+        });
+
+        // ===== CLASS SCHEDULE DATA =====
+        const scheduleData = [
+            { id: 1, class: 'Morning HIIT Blast', type: 'hiit', instructor: 'Marcus Cole', time: '06:00 AM', duration: '45 min', available: 12, total: 20 },
+            { id: 2, class: 'Boxing Fundamentals', type: 'boxing', instructor: 'Elena Vasquez', time: '07:30 AM', duration: '60 min', available: 8, total: 15 },
+            { id: 3, class: 'Zen Yoga Flow', type: 'yoga', instructor: 'Jasmine Lee', time: '08:00 AM', duration: '55 min', available: 0, total: 10 },
+            { id: 4, class: 'Strength & Conditioning', type: 'strength', instructor: 'Marcus Cole', time: '12:00 PM', duration: '50 min', available: 15, total: 20 },
+            { id: 5, class: 'Cycling Party', type: 'cycling', instructor: 'DJ Rhyme', time: '05:30 PM', duration: '45 min', available: 20, total: 25 },
+            { id: 6, class: 'Evening HIIT', type: 'hiit', instructor: 'Alex Chen', time: '06:30 PM', duration: '45 min', available: 5, total: 18 },
+            { id: 7, class: 'Boxing Sparring', type: 'boxing', instructor: 'Elena Vasquez', time: '07:00 PM', duration: '60 min', available: 10, total: 12 },
+            { id: 8, class: 'Night Yoga', type: 'yoga', instructor: 'Jasmine Lee', time: '08:30 PM', duration: '60 min', available: 18, total: 20 },
+            { id: 9, class: 'Full Body Burn', type: 'strength', instructor: 'Marcus Cole', time: '10:00 PM', duration: '50 min', available: 12, total: 15 }
+        ];
+
+        // Render schedule table
+        function renderSchedule(filter = 'all') {
+            const tbody = document.getElementById('schedule-body');
+            const mobileContainer = document.getElementById('mobileSchedule');
+            tbody.innerHTML = '';
+            mobileContainer.innerHTML = '';
+
+            const filtered = filter === 'all' ? scheduleData : scheduleData.filter(item => item.type === filter);
+
+            filtered.forEach(item => {
+                // Desktop row
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${item.class}</strong></td>
+                    <td>${item.instructor}</td>
+                    <td class="time">${item.time}</td>
+                    <td>${item.duration}</td>
+                    <td>
+                        <div class="availability">
+                            <span class="availability-indicator ${item.available > 0 ? 'open' : ''}"></span>
+                            ${item.available}/${item.total}
+                        </div>
+                    </td>
+                    <td>
+                        <button class="book-btn" ${item.available === 0 ? 'disabled' : ''} onclick="bookClass('${item.class}')">
+                            ${item.available === 0 ? 'FULL' : 'BOOK'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+
+                // Mobile item
+                const mobileItem = document.createElement('div');
+                mobileItem.className = 'mobile-schedule-item';
+                mobileItem.innerHTML = `
+                    <div class="class-info">
+                        <strong>${item.class}</strong>
+                        <span class="class-type">${item.type}</span>
+                    </div>
+                    <div class="mobile-schedule-details">
+                        <p><strong>Instructor:</strong> ${item.instructor}</p>
+                        <div class="time">${item.time} • ${item.duration}</div>
+                        <div class="availability" style="margin-top: 0.5rem;">
+                            <span class="availability-indicator ${item.available > 0 ? 'open' : ''}"></span>
+                            ${item.available}/${item.total} spots
+                        </div>
+                        <button class="book-btn" style="margin-top: 0.8rem; width: 100%;" ${item.available === 0 ? 'disabled' : ''} onclick="bookClass('${item.class}')">
+                            ${item.available === 0 ? 'FULL' : 'BOOK NOW'}
+                        </button>
+                    </div>
+                `;
+                mobileContainer.appendChild(mobileItem);
+            });
+        }
+
+        // Filter functionality
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderSchedule(btn.dataset.filter);
+            });
+        });
+
+        // Book class (simulated)
+        function bookClass(className) {
+            alert(`Booking confirmed for ${className}! Check your email for details.`);
+        }
+
+        // Initial render
+        renderSchedule();
+
+        // ===== MULTI-STEP FORM =====
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        function showStep(step) {
+            document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.form-step[data-step="${step}"]`).classList.add('active');
+
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+
+            // Update completed steps
+            for (let i = 1; i < step; i++) {
+                document.querySelector(`.step[data-step="${i}"]`).classList.add('completed');
+            }
+
+            // Enable/disable next button on step 1
+            if (step === 1) {
+                const nextBtn = document.querySelector(`.form-step[data-step="1"] .form-actions .btn`);
+                validateStep1();
+                nextBtn.disabled = !validateStep1();
+            }
+
+            currentStep = step;
+        }
+
+        function validateStep1() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const dob = document.getElementById('dob').value;
+
+            let valid = true;
+
+            if (!firstName) {
+                document.getElementById('firstName').closest('.form-group').classList.add('error');
+                valid = false;
+            } else {
+                document.getElementById('firstName').closest('.form-group').classList.remove('error');
+            }
+
+            if (!lastName) {
+                document.getElementById('lastName').closest('.form-group').classList.add('error');
+                valid = false;
+            } else {
+                document.getElementById('lastName').closest('.form-group').classList.remove('error');
+            }
+
+            if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+                document.getElementById('email').closest('.form-group').classList.add('error');
+                valid = false;
+            } else {
+                document.getElementById('email').closest('.form-group').classList.remove('error');
+            }
+
+            if (!phone) {
+                document.getElementById('phone').closest('.form-group').classList.add('error');
+                valid = false;
+            } else {
+                document.getElementById('phone').closest('.form-group').classList.remove('error');
+            }
+
+            if (!dob) {
+                document.getElementById('dob').closest('.form-group').classList.add('error');
+                valid = false;
+            } else {
+                document.getElementById('dob').closest('.form-group').classList.remove('error');
+            }
+
+            return valid;
+        }
+
+        function validateStep2() {
+            const planSelected = document.querySelector('input[name="plan"]:checked');
+            if (!planSelected) {
+                document.querySelector('.form-step[data-step="2"] .form-group').classList.add('error');
+                return false;
+            } else {
+                document.querySelector('.form-step[data-step="2"] .form-group').classList.remove('error');
+                return true;
+            }
+        }
+
+        function validateStep3() {
+            const cardName = document.getElementById('cardName').value.trim();
+            const cardNumber = document.getElementById('cardNumber').value.trim();
+            const expiry = document.getElementById('expiry').value.trim();
+            const cvv = document.getElementById('cvv').value.trim();
+            const waiver = document.getElementById('waiver').checked;
+
+            let valid = true;
+
+            if (!cardName) {
+                document.getElementById('cardName').closest('.form-group').classList.add('error');
+                valid = false;
+            } else {
+                document.getElementById('cardName').closest('.form-group').classList.remove('error');
+            }
+
+            if (!cardNumber || !/^\d{4}\s?\d{4}\s?\d{4}\s?\d{4}$/.test(cardNumber.replace(/\s/g, ''))) {
+                document.getElementById('cardNumber').closest('.form-group').classList.add('error');
+                valid = false;
+            } else {
+                document.getElementById('cardNumber').closest('.form-group').classList.remove('error');
+            }
+
+            if (!expiry || !/^\d{2}\/\d{2}$/.test(expiry)) {
+                document.getElementById('expiry').closest('.form-group').classList.add('error');
+                valid = false;
+            } else {
+                document.getElementById('expiry').closest('.form-group').classList.remove('error');
+            }
+
+            if (!cvv || !/^\d{3}$/.test(cvv)) {
+                document.getElementById('cvv').closest('.form-group').classList.add('error');
+                valid = false;
+            } else {
+                document.getElementById('cvv').closest('.form-group').classList.remove('error');
+            }
+
+            if (!waiver) {
+                document.getElementById('waiver').closest('.form-group').classList.add('error');
+                valid = false;
+            } else {
+                document.getElementById('waiver').closest('.form-group').classList.remove('error');
+            }
+
+            return valid;
+        }
+
+        // Form input listeners for real-time validation on step 1
+        document.querySelectorAll('#firstName, #lastName, #email, #phone, #dob').forEach(input => {
+            input.addEventListener('input', () => {
+                validateStep1();
+                updateNextButton();
+            });
+        });
+
+        function updateNextButton() {
+            const nextBtn = document.querySelector(`.form-step[data-step="1"] .form-actions .btn`);
+            if (nextBtn) nextBtn.disabled = !validateStep1();
+        }
+
+        function nextStep() {
+            if (currentStep === 1 && !validateStep1()) return;
+            if (currentStep === 2 && !validateStep2()) return;
+            if (currentStep === 3 && !validateStep3()) return;
+
+            if (currentStep < totalSteps) {
+                if (currentStep === 3) {
+                    // Simulate submission and generate member ID
+                    const memberId = 'NX-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                    document.getElementById('memberId').textContent = memberId;
+                }
+                showStep(currentStep + 1);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                showStep(currentStep - 1);
+            }
+        }
+
+        function submitForm() {
+            if (validateStep3()) {
+                nextStep();
+            }
+        }
+
+        // Initialize form step 1
+        showStep(1);
+
+        // ===== FAQ ACCORDION =====
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const item = question.parentElement;
+                const isActive = item.classList.contains('active');
+
+                // Close all
+                document.querySelectorAll('.faq-item').forEach(faq => {
+                    faq.classList.remove('active');
+                });
+
+                // Open clicked if not already open
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // ===== TESTIMONIALS CAROUSEL =====
+        let currentSlide = 0;
+        const track = document.getElementById('carouselTrack');
+        const slides = document.querySelectorAll('.testimonial-card');
+        const dotsContainer = document.getElementById('carouselDots');
+
+        // Create dots
+        slides.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.className = `dot ${index === 0 ? 'active' : ''}`;
+            dot.addEventListener('click', () => goToSlide(index));
+            dotsContainer.appendChild(dot);
+        });
+
+        const dots = document.querySelectorAll('.dot');
+
+        function updateCarousel() {
+            track.style.transform = `translateX(-${currentSlide * 100}%)`;
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateCarousel();
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % slides.length;
+            updateCarousel();
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            updateCarousel();
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', nextSlide);
+        document.getElementById('prevBtn').addEventListener('click', prevSlide);
+
+        // Auto-advance every 8 seconds
+        setInterval(nextSlide, 8000);
+
+        // ===== SMOOTH SCROLL FOR ANCHOR LINKS =====
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                const target = document.querySelector(targetId);
+                if (target) {
+                    const headerOffset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // ===== STICKY HEADER EFFECT =====
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            const header = document.querySelector('header');
+
+            if (currentScroll > 100) {
+                header.style.height = '60px';
+                header.style.background = currentScroll > 200 ? 'rgba(10,10,10,0.95)' : 'rgba(10,10,10,0.85)';
+                if (document.documentElement.getAttribute('data-theme') === 'light') {
+                    header.style.background = currentScroll > 200 ? 'rgba(245,245,245,0.95)' : 'rgba(245,245,245,0.85)';
+                }
+            } else {
+                header.style.height = 'var(--header-height)';
+                header.style.background = '';
+            }
+
+            lastScroll = currentScroll;
+        });
+
+        // Add parallax effect to hero floating shapes on scroll
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            document.querySelectorAll('.floating-shape').forEach(shape => {
+                const speed = 0.3;
+                shape.style.transform = `translateY(${scrolled * speed}px)`;
+            });
+        });
+
+        // Format card number input
+        document.getElementById('cardNumber').addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formatted = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+                formatted += value[i];
+            }
+            e.target.value = formatted;
+        });
+
+        // Format expiry input
+        document.getElementById('expiry').addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // Format phone input
+        document.getElementById('phone').addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 6) {
+                value = '(' + value.substring(0,3) + ') ' + value.substring(3,6) + '-' + value.substring(6,10);
+            } else if (value.length >= 3) {
+                value = '(' + value.substring(0,3) + ') ' + value.substring(3);
+            }
+            e.target.value = value;
+        });
+
+        // ===== RAZORPAY PAYMENT INTEGRATION =====
+        const RAZORPAY_KEY_ID = 'your_razorpay_key_id'; // Replace with your Razorpay Key ID
+
+        // Initialize Razorpay if script is loaded
+        let razorpayScriptLoaded = false;
+        let razorpayCheckout;
+
+        function loadRazorpayScript() {
+            if (!razorpayScriptLoaded) {
+                const script = document.createElement('script');
+                script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+                script.onload = () => {
+                    razorpayScriptLoaded = true;
+                    razorpayCheckout = window.Razorpay;
+                };
+                document.head.appendChild(script);
+            }
+        }
+
+        loadRazorpayScript();
+
+        // Payment options and pricing
+        const plans = {
+            basic: { id: 'basic', name: 'Basic', price: 4900, currency: 'INR' }, // 49 * 100
+            pro: { id: 'pro', name: 'Pro', price: 9900, currency: 'INR' }, // 99 * 100
+            elite: { id: 'elite', name: 'Elite', price: 19900, currency: 'INR' } // 199 * 100
+        };
+
+        // Track selected plan
+        let selectedPlan = null;
+
+        // Add click listeners to pricing buttons
+        document.getElementById('basicBtn').addEventListener('click', () => initiatePayment(plans.basic));
+        document.getElementById('proBtn').addEventListener('click', () => initiatePayment(plans.pro));
+        document.getElementById('eliteBtn').addEventListener('click', () => initiatePayment(plans.elite));
+        document.getElementById('startTrialBtn').addEventListener('click', () => initiatePayment(plans.basic));
+
+        function initiatePayment(plan) {
+            if (!razorpayScriptLoaded) {
+                alert('Payment system is loading. Please try again in a moment.');
+                return;
+            }
+
+            selectedPlan = plan;
+
+            // Show payment overlay
+            const paymentOverlay = document.getElementById('paymentOverlay');
+            paymentOverlay.classList.add('active');
+
+            // Create Razorpay order
+            createRazorpayOrder(plan)
+                .then(order => {
+                    showPaymentModal(order, plan);
+                })
+                .catch(error => {
+                    console.error('Error creating Razorpay order:', error);
+                    alert('Error creating payment order. Please try again.');
+                    paymentOverlay.classList.remove('active');
+                });
+        }
+
+        async function createRazorpayOrder(plan) {
+            const response = await fetch('/create-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: plan.price,
+                    currency: plan.currency,
+                    receipt: `NEXUS_${Date.now()}`,
+                    payment_capture: 1
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create Razorpay order');
+            }
+
+            return await response.json();
+        }
+
+        function showPaymentModal(order, plan) {
+            if (!razorpayCheckout) {
+                alert('Razorpay is not loaded. Please try again later.');
+                document.getElementById('paymentOverlay').classList.remove('active');
+                return;
+            }
+            const paymentDetails = document.getElementById('paymentDetails');
+            paymentDetails.innerHTML = `
+                <strong>Plan:</strong> ${plan.name}<br>
+                <strong>Amount:</strong> ₹${(plan.price / 100).toFixed(2)}<br>
+                <strong>Order ID:</strong> ${order.id}
+            `;
+
+            const paymentStatus = document.getElementById('paymentStatus');
+            paymentStatus.textContent = 'Ready to pay';
+
+            const options = {
+                key: RAZORPAY_KEY_ID,
+                order_id: order.id,
+                name: 'NEXUS FITNESS',
+                description: 'Membership Fee',
+                image: 'https://via.placeholder.com/128x128.png?text=NEXUS',
+                handler: function (response) {
+                    verifyPayment(response, order.id)
+                        .then(result => {
+                            if (result.verified) {
+                                paymentSuccess(response, plan);
+                            } else {
+                                paymentError('Payment verification failed');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Payment verification error:', error);
+                            paymentError('Payment verification failed');
+                        });
+                },
+                theme: {
+                    color: '#39ff14'
+                }
+            };
+
+            const rzp1 = new razorpayCheckout(options);
+            rzp1.open();
+        }
+
+        async function verifyPayment(response, orderId) {
+            const verificationResponse = await fetch('/verify-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    razorpay_order_id: orderId,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature
+                })
+            });
+
+            if (!verificationResponse.ok) {
+                throw new Error('Payment verification failed');
+            }
+
+            return await verificationResponse.json();
+        }
+
+        function paymentSuccess(response, plan) {
+            const paymentOverlay = document.getElementById('paymentOverlay');
+            const paymentStatus = document.getElementById('paymentStatus');
+            const paymentDetails = document.getElementById('paymentDetails');
+
+            paymentStatus.textContent = 'Payment Successful!';
+            paymentStatus.className = 'payment-success';
+            paymentDetails.innerHTML = `
+                <strong>Plan:</strong> ${plan.name}<br>
+                <strong>Amount:</strong> ₹${(plan.price / 100).toFixed(2)}<br>
+                <strong>Payment ID:</strong> ${response.razorpay_payment_id}
+            `;
+
+            setTimeout(() => {
+                paymentOverlay.classList.remove('active');
+                showPaymentConfirmation(plan);
+            }, 2000);
+        }
+
+        function paymentError(message) {
+            const paymentStatus = document.getElementById('paymentStatus');
+            paymentStatus.textContent = message;
+            paymentStatus.className = 'payment-success';
+            paymentStatus.style.color = 'var(--danger)';
+        }
+
+        function showPaymentConfirmation(plan) {
+            // Update form to show success
+            currentStep = 4;
+            showStep(4);
+
+            // Update member ID with payment info
+            const memberId = document.getElementById('memberId');
+            memberId.textContent = `NEXUS-${plan.id.toUpperCase()}-${Date.now().toString().slice(-6)}`;
+        }
+
+        // Close payment modal
+        document.getElementById('closePayment').addEventListener('click', () => {
+            document.getElementById('paymentOverlay').classList.remove('active');
+        });
+
+        // Close overlay when clicking outside
+        document.getElementById('paymentOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'paymentOverlay') {
+                document.getElementById('paymentOverlay').classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
