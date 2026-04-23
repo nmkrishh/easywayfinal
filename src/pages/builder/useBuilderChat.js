@@ -191,6 +191,11 @@ export function useBuilderChat() {
     ].join("\n");
   }, []);
 
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  const appendMsg = useCallback((role, content) => {
+    setMessages(prev => [...prev, { role, content }]);
+  }, []);
+
   useEffect(() => {
     getBusinessProfile()
       .then((res) => { businessProfileRef.current = res?.profile || null; })
@@ -251,10 +256,6 @@ export function useBuilderChat() {
     return candidate.slice(0, 80);
   }, []);
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-  const appendMsg = useCallback((role, content) => {
-    setMessages(prev => [...prev, { role, content }]);
-  }, []);
 
 
 

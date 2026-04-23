@@ -156,7 +156,9 @@ function BuildSpecDropdown({ c, value, options, onValueChange }) {
 
 // â”€â”€ Inject global keyframe animations once â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ANIM_STYLE_ID = "ew-builder-anims";
-if (!document.getElementById(ANIM_STYLE_ID)) {
+function ensureBuilderAnims() {
+  if (typeof document === "undefined") return;
+  if (document.getElementById(ANIM_STYLE_ID)) return;
   const style = document.createElement("style");
   style.id = ANIM_STYLE_ID;
   style.textContent = `
@@ -264,6 +266,9 @@ function PublishNameDialog({ c, onConfirm, onCancel }) {
 
 export default function AIWebsiteBuilderPage({ theme, onBack }) {
   const c = buildColors(theme);
+
+  // Inject animation keyframes safely inside the component lifecycle
+  React.useEffect(() => { ensureBuilderAnims(); }, []);
 
   const {
     messages, htmlContent, projectFiles, stage, agentLog, generating, error,
