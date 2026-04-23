@@ -1,0 +1,57 @@
+name: Android EAS Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "EAS profile"
+        required: true
+        default: "preview"
+        type: choice
+        options:
+          - preview
+          - production
+  push:
+    branches: ["main"]
+    paths:
+      - "mobile/**"
+      - ".github/workflows/android-eas-build.yml"
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Resolve build profile
+        id: profile
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ github.event.inputs.profile }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=preview" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build Android
+        run: eas build --platform android --profile "${{ steps.profile.outputs.value }}" --non-interactive

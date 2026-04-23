@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+﻿import React, { memo } from "react";
 
 const ChatTopBar = memo(({ c, onBack, title, badge }) => (
   <div style={{
@@ -18,7 +18,7 @@ const ChatTopBar = memo(({ c, onBack, title, badge }) => (
         style={{
           background: "none", border: "none", cursor: "pointer",
           color: c.muted,
-          fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+          fontFamily: "var(--font-body)",
           fontSize: "0.875rem", padding: "0.25rem 0",
           display: "flex", alignItems: "center", gap: "0.35rem",
         }}
@@ -38,21 +38,21 @@ const ChatTopBar = memo(({ c, onBack, title, badge }) => (
           fontSize: "0.62rem", fontWeight: 700,
           letterSpacing: "0.07em", textTransform: "uppercase",
           color: c.accent,
-          fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+          fontFamily: "var(--font-body)",
         }}>
           {badge || "AI"}
         </div>
 
         <div>
           <div style={{
-            fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+            fontFamily: "var(--font-body)",
             fontWeight: 700, fontSize: "0.95rem", color: c.text, lineHeight: 1.2,
           }}>
             {title || "AI Builder"}
           </div>
           <div style={{
             fontSize: "0.68rem", color: "#4ade80",
-            fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+            fontFamily: "var(--font-body)",
             fontWeight: 500,
           }}>
             Online
@@ -63,7 +63,7 @@ const ChatTopBar = memo(({ c, onBack, title, badge }) => (
 
     <span style={{
       fontSize: "0.75rem", color: c.muted,
-      fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+      fontFamily: "var(--font-body)",
     }}>
       Powered by EasyWay AI
     </span>
@@ -72,3 +72,4 @@ const ChatTopBar = memo(({ c, onBack, title, badge }) => (
 
 ChatTopBar.displayName = "ChatTopBar";
 export default ChatTopBar;
+

@@ -1,0 +1,2145 @@
+{
+  "name": "Android App Builder with GitHub Integration (Jan 21 at 18:55:49)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "android-app-builder",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "bf7cb822-df54-4906-9bb4-bee435d56af4",
+      "name": "Webhook - Receive App Data",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3328,
+        208
+      ],
+      "webhookId": "95f86f63-291e-43d9-b34b-9dfd9b5e522b",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "github_owner",
+              "value": "nvmkrish",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "github_repo",
+              "value": "webview-base-app",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "github_branch",
+              "value": "main",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "workflow_file",
+              "value": "build.yml",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f5c2c7d9-d8d3-459c-b93d-4bdab899d238",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3040,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "app_name",
+              "value": "={{ $('Webhook - Receive App Data').item.json.body.app_name }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "web_url",
+              "value": "={{ $('Webhook - Receive App Data').item.json.body.website_url }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "github_owner",
+              "value": "={{ $('Workflow Configuration').item.json.github_owner }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "github_repo",
+              "value": "={{ $('Workflow Configuration').item.json.github_repo }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "github_branch",
+              "value": "={{ $('Workflow Configuration').item.json.github_branch }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "workflow_file",
+              "value": "={{ $('Workflow Configuration').item.json.workflow_file }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "615e2762-0cc4-448e-9b02-be4e991c222d",
+      "name": "Prepare Webhook Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2800,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.github.com/repos/' + $json.github_owner + '/' + $json.github_repo + '/contents/app/build.gradle.kts' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-workflow"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b514ffef-7efe-48e1-beed-e851d6ed185d",
+      "name": "GitHub - Read build.gradle.kts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2576,
+        304
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = Buffer.from($json.content, 'base64').toString('utf-8');\nconst webUrl = $('Prepare Webhook Data').item.json.web_url;\nconst updatedContent = content.replace(/const val WEBSITE_URL = \".*?\"/g, `const val WEBSITE_URL = \"${webUrl}\"`);\nconst encodedContent = Buffer.from(updatedContent).toString('base64');\n\nreturn [{\n  json: {\n    content: encodedContent,\n    sha: $json.sha,\n    message: 'Update website URL',\n    branch: $('Prepare Webhook Data').item.json.github_branch\n  }\n}];"
+      },
+      "id": "29f1a2a2-8029-438d-87fc-90ea9ba4d1f1",
+      "name": "Decode and Update build.gradle.kts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2144,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://api.github.com/repos/' + $('Prepare Webhook Data').item.json.github_owner + '/' + $('Prepare Webhook Data').item.json.github_repo + '/contents/app/build.gradle.kts' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-workflow"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { 'message': $json.message, 'content': $json.content, 'sha': $json.sha, 'branch': $json.branch } }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "a59e6418-aff8-4559-9479-05e366e66c62",
+      "name": "GitHub - Commit build.gradle.kts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1920,
+        304
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $('GitHub - Commit build.gradle.kts').item.json.statusCode }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "008e041d-26dc-4deb-ba56-aa93a816cf2c",
+      "name": "Check build.gradle.kts Commit",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1696,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.github.com/repos/' + $('Prepare Webhook Data').item.json.github_owner + '/' + $('Prepare Webhook Data').item.json.github_repo + '/contents/app/src/main/res/values/strings.xml' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-workflow"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a66e47bb-f41d-43b5-909a-678beae46575",
+      "name": "GitHub - Read strings.xml",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1472,
+        208
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = Buffer.from($json.content, 'base64').toString('utf-8');\nconst appName = $('Prepare Webhook Data').item.json.app_name;\nconst updatedContent = content.replace(/<string name=\"app_name\">.*?<\\/string>/g, `<string name=\"app_name\">${appName}</string>`);\nconst encodedContent = Buffer.from(updatedContent).toString('base64');\nreturn [{ json: { content: encodedContent, sha: $json.sha, message: 'Update app name', branch: $('Prepare Webhook Data').item.json.github_branch } }];"
+      },
+      "id": "fd775049-0e3e-4883-9a50-79ce4d42e805",
+      "name": "Decode and Update strings.xml",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1248,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://api.github.com/repos/' + $('Prepare Webhook Data').item.json.github_owner + '/' + $('Prepare Webhook Data').item.json.github_repo + '/contents/app/src/main/res/values/strings.xml' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-workflow"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { 'message': $json.message, 'content': $json.content, 'sha': $json.sha, 'branch': $json.branch } }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "b392b9c1-85a4-4471-97e6-1132bbaf6168",
+      "name": "GitHub - Commit strings.xml",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1024,
+        208
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $('GitHub - Commit strings.xml').item.json.statusCode }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6fb12907-8d83-48b4-aaeb-18bcc1875e9b",
+      "name": "Check strings.xml Commit",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -800,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.github.com/repos/' + $('Prepare Webhook Data').item.json.github_owner + '/' + $('Prepare Webhook Data').item.json.github_repo + '/actions/workflows/' + $('Prepare Webhook Data').item.json.workflow_file + '/dispatches' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-workflow"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { 'ref': $('Prepare Webhook Data').item.json.github_branch, 'inputs': { 'app_name': $('Prepare Webhook Data').item.json.app_name, 'web_url': $('Prepare Webhook Data').item.json.web_url } } }}",
+        "options": {}
+      },
+      "id": "6f23e46e-cc83-48b4-893f-70a9fc065cc4",
+      "name": "GitHub - Trigger Workflow Dispatch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -576,
+        64
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $('GitHub - Trigger Workflow Dispatch').item.json.statusCode }}",
+              "rightValue": 204,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a9fad71d-5d79-459c-9cfc-9a96ada01052",
+      "name": "Check Workflow Dispatch",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -352,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { 'status': 'success', 'message': 'App build started', 'app_name': $('Prepare Webhook Data').item.json.app_name, 'web_url': $('Prepare Webhook Data').item.json.web_url } }}",
+        "options": {}
+      },
+      "id": "45f26651-7db3-4831-86e1-6f0ebc3ccec4",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -128,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "Failed to commit build.gradle.kts to GitHub. Please check your GitHub credentials and repository settings."
+      },
+      "id": "dbb88235-2d75-4964-b329-604bb656473e",
+      "name": "Error - build.gradle.kts Failed",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -1472,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "Failed to commit strings.xml to GitHub. Please check your GitHub credentials and repository settings."
+      },
+      "id": "782157c2-7193-40d7-81a2-4dee876a258d",
+      "name": "Error - strings.xml Failed",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "Failed to trigger GitHub Actions workflow. Please check your workflow file name and GitHub credentials."
+      },
+      "id": "91e6056a-5a5e-41e8-b113-b158d3e241b5",
+      "name": "Error - Workflow Dispatch Failed",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "icon",
+        "destinationKey": "icon0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1904,
+        -2048
+      ],
+      "id": "4565a4f7-49ce-45d4-995e-ada2333e8c0c",
+      "name": "Extract from File",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2d6c7044-e04b-4797-8d37-5265a8c48d64",
+              "name": "message",
+              "value": "=Update app icon via n8n",
+              "type": "string"
+            },
+            {
+              "id": "256ffc56-9707-4074-b465-b9645af7bdb1",
+              "name": "sha",
+              "value": "={{ $json.body.sha }}",
+              "type": "string"
+            },
+            {
+              "id": "2971d47c-3a75-4b6d-9d3f-dbf62ae326cd",
+              "name": "content",
+              "value": "={{ $json.icon0 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1568,
+        -2240
+      ],
+      "id": "a6c18a99-6137-457f-9377-cfc377b938b9",
+      "name": "Edit Fields",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1744,
+        -2240
+      ],
+      "id": "4281c5ea-4931-4ba3-b2d9-2d7d258868f9",
+      "name": "Merge",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/nvmkrish/webview-base-app/contents/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1968,
+        -2256
+      ],
+      "id": "7cafcd48-8754-49f5-8a7d-3c6cdbd63f6e",
+      "name": "get mdpi",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/nvmkrish/webview-base-app/contents/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{ $json.message }}\",\n  \"content\": \"{{ $json.content }}\",\n  \"sha\": \"{{ $json.sha }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1312,
+        -2240
+      ],
+      "id": "c99f1ed1-6afc-444e-8d37-3025f2d06cc9",
+      "name": "put mdpi",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "resize",
+        "dataPropertyName": "icon",
+        "width": 48,
+        "height": 48,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        -2096,
+        -2048
+      ],
+      "id": "4310e4e1-b083-4cfa-87b9-4c30b82edf72",
+      "name": "Edit Image"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "icon",
+        "destinationKey": "icon0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1920,
+        -1584
+      ],
+      "id": "d940cafa-95ee-4e47-bafe-4a5ac5d59d1b",
+      "name": "Extract from File1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2d6c7044-e04b-4797-8d37-5265a8c48d64",
+              "name": "message",
+              "value": "=Update app icon via n8n",
+              "type": "string"
+            },
+            {
+              "id": "256ffc56-9707-4074-b465-b9645af7bdb1",
+              "name": "sha",
+              "value": "={{ $json.body.sha }}",
+              "type": "string"
+            },
+            {
+              "id": "2971d47c-3a75-4b6d-9d3f-dbf62ae326cd",
+              "name": "content",
+              "value": "={{ $json.icon0 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1584,
+        -1776
+      ],
+      "id": "924c4275-7349-4733-acc5-0fe974a5076e",
+      "name": "Edit Fields1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1760,
+        -1776
+      ],
+      "id": "546e353d-16b5-407e-9dbc-aa977b924f42",
+      "name": "Merge1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/nvmkrish/webview-base-app/contents/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1984,
+        -1792
+      ],
+      "id": "9042ec5f-564e-470b-847d-803b1ddf63f6",
+      "name": "get mdpi1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/nvmkrish/webview-base-app/contents/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{ $json.message }}\",\n  \"content\": \"{{ $json.content }}\",\n  \"sha\": \"{{ $json.sha }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1328,
+        -1776
+      ],
+      "id": "ea6b3565-9a10-43ae-883f-1ef5882aa012",
+      "name": "put mdpi1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "resize",
+        "dataPropertyName": "icon",
+        "width": 48,
+        "height": 48,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        -2112,
+        -1584
+      ],
+      "id": "008a2778-cf1d-4808-92ec-d16c9af96402",
+      "name": "Edit Image1"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "icon",
+        "destinationKey": "icon0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1920,
+        -1088
+      ],
+      "id": "b46da5ec-42bb-4569-9eee-f5ce82388196",
+      "name": "Extract from File2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2d6c7044-e04b-4797-8d37-5265a8c48d64",
+              "name": "message",
+              "value": "=Update app icon via n8n",
+              "type": "string"
+            },
+            {
+              "id": "256ffc56-9707-4074-b465-b9645af7bdb1",
+              "name": "sha",
+              "value": "={{ $json.body.sha }}",
+              "type": "string"
+            },
+            {
+              "id": "2971d47c-3a75-4b6d-9d3f-dbf62ae326cd",
+              "name": "content",
+              "value": "={{ $json.icon0 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1584,
+        -1280
+      ],
+      "id": "594bc920-29fe-4e36-ab63-b40e6c3d0efd",
+      "name": "Edit Fields2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1760,
+        -1280
+      ],
+      "id": "1d99470a-020a-4d6b-a678-02af4ece62b1",
+      "name": "Merge2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/nvmkrish/webview-base-app/contents/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1984,
+        -1296
+      ],
+      "id": "7055c0db-074a-4d17-969f-e93efae66a81",
+      "name": "get mdpi2",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/nvmkrish/webview-base-app/contents/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{ $json.message }}\",\n  \"content\": \"{{ $json.content }}\",\n  \"sha\": \"{{ $json.sha }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1328,
+        -1280
+      ],
+      "id": "9be9aec0-ed2f-4482-8ce4-596e66e13f06",
+      "name": "put mdpi2",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "resize",
+        "dataPropertyName": "icon",
+        "width": 48,
+        "height": 48,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        -2112,
+        -1088
+      ],
+      "id": "0cc9ac65-b6d5-4aac-9de3-5c040c1f3309",
+      "name": "Edit Image2"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "icon",
+        "destinationKey": "icon0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1936,
+        -624
+      ],
+      "id": "9ea4c32a-5a20-43c0-81b6-433b0bf91dce",
+      "name": "Extract from File3",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2d6c7044-e04b-4797-8d37-5265a8c48d64",
+              "name": "message",
+              "value": "=Update app icon via n8n",
+              "type": "string"
+            },
+            {
+              "id": "256ffc56-9707-4074-b465-b9645af7bdb1",
+              "name": "sha",
+              "value": "={{ $json.body.sha }}",
+              "type": "string"
+            },
+            {
+              "id": "2971d47c-3a75-4b6d-9d3f-dbf62ae326cd",
+              "name": "content",
+              "value": "={{ $json.icon0 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1600,
+        -816
+      ],
+      "id": "cd6541a7-b6ce-48db-81e6-f0a0b7562100",
+      "name": "Edit Fields3",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1776,
+        -816
+      ],
+      "id": "90dd1f65-45e4-4e3c-9669-ab7672e6a2a4",
+      "name": "Merge3",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/nvmkrish/webview-base-app/contents/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2000,
+        -832
+      ],
+      "id": "823b6a67-9b89-46fb-bac2-96bb9cce20c1",
+      "name": "get mdpi3",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/nvmkrish/webview-base-app/contents/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{ $json.message }}\",\n  \"content\": \"{{ $json.content }}\",\n  \"sha\": \"{{ $json.sha }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1344,
+        -816
+      ],
+      "id": "90478c4b-b7d9-4501-9593-2e363a5bf78c",
+      "name": "put mdpi3",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "resize",
+        "dataPropertyName": "icon",
+        "width": 48,
+        "height": 48,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        -2128,
+        -624
+      ],
+      "id": "6dc5c62f-e646-4887-828f-59da94783259",
+      "name": "Edit Image3"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "icon",
+        "destinationKey": "icon0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1936,
+        -176
+      ],
+      "id": "dcd58766-4290-45d7-b3dc-9690b65fb1ae",
+      "name": "Extract from File4",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2d6c7044-e04b-4797-8d37-5265a8c48d64",
+              "name": "message",
+              "value": "=Update app icon via n8n",
+              "type": "string"
+            },
+            {
+              "id": "256ffc56-9707-4074-b465-b9645af7bdb1",
+              "name": "sha",
+              "value": "={{ $json.body.sha }}",
+              "type": "string"
+            },
+            {
+              "id": "2971d47c-3a75-4b6d-9d3f-dbf62ae326cd",
+              "name": "content",
+              "value": "={{ $json.icon0 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1600,
+        -368
+      ],
+      "id": "db38f1e6-c455-4a2d-86df-9cd857ecac89",
+      "name": "Edit Fields4",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1776,
+        -368
+      ],
+      "id": "23afb6a8-be4f-4c3d-bf18-8f234bb40c6c",
+      "name": "Merge4",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/nvmkrish/webview-base-app/contents/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2000,
+        -384
+      ],
+      "id": "969cf029-deda-4001-957f-f58d30899f7e",
+      "name": "get mdpi4",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.github.com/repos/nvmkrish/webview-base-app/contents/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{ $json.message }}\",\n  \"content\": \"{{ $json.content }}\",\n  \"sha\": \"{{ $json.sha }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1344,
+        -368
+      ],
+      "id": "a0961cbe-7237-419d-8035-d3fa60e24866",
+      "name": "put mdpi4",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tO2116dnmlUKFqo2",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "resize",
+        "dataPropertyName": "icon",
+        "width": 48,
+        "height": 48,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        -2128,
+        -176
+      ],
+      "id": "d7328561-95a7-4a3b-a9b2-2e7e89440182",
+      "name": "Edit Image4"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "nvmkrish",
+          "mode": "list",
+          "cachedResultName": "nvmkrish",
+          "cachedResultUrl": "https://github.com/nvmkrish"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "webview-base-app",
+          "mode": "list",
+          "cachedResultName": "webview-base-app",
+          "cachedResultUrl": "https://github.com/nvmkrish/webview-base-app"
+        },
+        "filePath": "app/build.gradle.kts",
+        "fileContent": "={{ $json.fileContent }}\n",
+        "commitMessage": "Update applicationId dynamically"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -1808,
+        80
+      ],
+      "id": "97786fa1-3fac-4e7b-afbf-72bc9f642bc6",
+      "name": "Edit a file",
+      "webhookId": "a3668e96-305f-45c9-8f00-47684a8e57e4",
+      "credentials": {
+        "githubApi": {
+          "id": "mc1BdEhXcGA89OcX",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "github_owner",
+              "value": "nvmkrish",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "github_repo",
+              "value": "webview-base-app",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "github_branch",
+              "value": "main",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "workflow_file",
+              "value": "build.yml",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a2f4ed09-0235-4601-842c-f4660c759ff5",
+      "name": "Workflow Configuration1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2592,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "app_name",
+              "value": "={{ $('Webhook - Receive App Data').item.json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "web_url",
+              "value": "={{ $('Webhook - Receive App Data').item.json.body.url }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "github_owner",
+              "value": "={{ $('Workflow Configuration1').item.json.github_owner }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "github_repo",
+              "value": "={{ $('Workflow Configuration1').item.json.github_repo }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "github_branch",
+              "value": "={{ $('Workflow Configuration1').item.json.github_branch }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "workflow_file",
+              "value": "={{ $('Workflow Configuration1').item.json.workflow_file }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "12b32267-cbf2-4a89-8959-b422ceb9fe00",
+      "name": "Prepare Webhook Data1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2400,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// get app name safely\nconst appNameRaw = $input.first().json.body?.name || \"myapp\";\n\n// sanitize\nconst appName = appNameRaw\n  .toLowerCase()\n  .replace(/[^a-z0-9]/g, \"\");\n\n// new applicationId\nconst newAppId = `com.${appName}.webview`;\n\n// decode base64 → text\nconst original = Buffer.from(\n  $input.first().json.content,\n  \"base64\"\n).toString(\"utf-8\");\n\n// replace applicationId\nconst updatedGradle = original.replace(\n  /applicationId\\s*=\\s*\".*?\"/,\n  `applicationId = \"${newAppId}\"`\n);\n\nreturn {\n  fileContent: updatedGradle,\n  applicationId: newAppId\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1984,
+        96
+      ],
+      "id": "14c7d64f-c036-42d7-b99e-43e0370d9b86",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "nvmkrish",
+          "mode": "list",
+          "cachedResultName": "nvmkrish",
+          "cachedResultUrl": "https://github.com/nvmkrish"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "webview-base-app",
+          "mode": "list",
+          "cachedResultName": "webview-base-app",
+          "cachedResultUrl": "https://github.com/nvmkrish/webview-base-app"
+        },
+        "filePath": "app/build.gradle.kts",
+        "asBinaryProperty": false,
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -2192,
+        96
+      ],
+      "id": "8c461f41-3455-4936-8331-310875c54697",
+      "name": "Get a file",
+      "webhookId": "5f94b3d1-70a8-415c-87ed-93aaaffb7b85",
+      "credentials": {
+        "githubApi": {
+          "id": "mc1BdEhXcGA89OcX",
+          "name": "GitHub account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook - Receive App Data": [
+      {
+        "json": {
+          "headers": {
+            "host": "localhost:5678",
+            "connection": "keep-alive",
+            "content-length": "719752",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+            "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+            "content-type": "multipart/form-data; boundary=----WebKitFormBoundary7C5VOjCTZkjrC2kJ",
+            "sec-ch-ua-mobile": "?0",
+            "accept": "*/*",
+            "origin": "http://127.0.0.1:5500",
+            "sec-fetch-site": "cross-site",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-dest": "empty",
+            "referer": "http://127.0.0.1:5500/",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "en-US,en;q=0.9"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "app_name": "CodeVex",
+            "website_url": "https://codevex-influencer.vercel.app/",
+            "client_name": "KRISHNA V",
+            "client_email": "krishnadjb9@gmail.com",
+            "client_phone": "36346",
+            "submitted_at": "2026-04-09T09:12:15.835Z",
+            "source": "website_form"
+          },
+          "webhookUrl": "http://localhost:5678/webhook/android-app-builder",
+          "executionMode": "production"
+        },
+        "binary": {
+          "icon": {
+            "mimeType": "image/png",
+            "fileType": "image",
+            "fileExtension": "png",
+            "data": "filesystem-v2",
+            "fileName": "46972569-25e7-4c12-b2cb-e962b0f8ee46.png",
+            "id": "filesystem-v2:workflows/2QMLKeMCewnMo5LdAOPjH/executions/temp/binary_data/0f0589f8-2409-4f48-8338-335aa28cfb9d",
+            "fileSize": "719 kB"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook - Receive App Data": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "get mdpi",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Image",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "get mdpi1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Image1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "get mdpi2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Image2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "get mdpi3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Image3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "get mdpi4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Image4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Workflow Configuration1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Prepare Webhook Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Webhook Data": {
+      "main": [
+        [
+          {
+            "node": "GitHub - Read build.gradle.kts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub - Read build.gradle.kts": {
+      "main": [
+        [
+          {
+            "node": "Decode and Update build.gradle.kts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decode and Update build.gradle.kts": {
+      "main": [
+        [
+          {
+            "node": "GitHub - Commit build.gradle.kts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub - Commit build.gradle.kts": {
+      "main": [
+        [
+          {
+            "node": "Check build.gradle.kts Commit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check build.gradle.kts Commit": {
+      "main": [
+        [
+          {
+            "node": "GitHub - Read strings.xml",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error - build.gradle.kts Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub - Read strings.xml": {
+      "main": [
+        [
+          {
+            "node": "Decode and Update strings.xml",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decode and Update strings.xml": {
+      "main": [
+        [
+          {
+            "node": "GitHub - Commit strings.xml",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub - Commit strings.xml": {
+      "main": [
+        [
+          {
+            "node": "Check strings.xml Commit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check strings.xml Commit": {
+      "main": [
+        [
+          {
+            "node": "GitHub - Trigger Workflow Dispatch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error - strings.xml Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub - Trigger Workflow Dispatch": {
+      "main": [
+        [
+          {
+            "node": "Check Workflow Dispatch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Workflow Dispatch": {
+      "main": [
+        [
+          {
+            "node": "Error - Workflow Dispatch Failed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "put mdpi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get mdpi": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "put mdpi": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Image": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "put mdpi1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get mdpi1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File2": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "put mdpi2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get mdpi2": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image2": {
+      "main": [
+        [
+          {
+            "node": "Extract from File2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File3": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "put mdpi3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get mdpi3": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image3": {
+      "main": [
+        [
+          {
+            "node": "Extract from File3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File4": {
+      "main": [
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "put mdpi4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge4": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get mdpi4": {
+      "main": [
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image4": {
+      "main": [
+        [
+          {
+            "node": "Extract from File4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "put mdpi1": {
+      "main": [
+        []
+      ]
+    },
+    "put mdpi2": {
+      "main": [
+        []
+      ]
+    },
+    "put mdpi3": {
+      "main": [
+        []
+      ]
+    },
+    "put mdpi4": {
+      "main": [
+        []
+      ]
+    },
+    "Workflow Configuration1": {
+      "main": [
+        [
+          {
+            "node": "Prepare Webhook Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Webhook Data1": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Edit a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Success Response": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "versionId": "9ebc54a3-eda7-480d-b446-85ace3e31785",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "53e32cfba717739323175d99ebeb635db8c65bd4cba3846743c0092911901e62"
+  },
+  "id": "2QMLKeMCewnMo5LdAOPjH",
+  "tags": []
+}

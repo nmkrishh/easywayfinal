@@ -1,37 +1,90 @@
-/**
- * Agent 7 — High-Conversion Optimizer (Minimax)
- * Validates and restructures the finished website HTML to guarantee extremely high conversion rates.
- */
 import { callAI, MODELS, extractHtml } from "./callAI.js";
 
-const SYSTEM = `You are a world-class Conversion Rate Optimization (CRO) expert and Elite Web Architect.
-Your job is to review the finished single-file React HTML code and ensure its structure is extremely high-converting and flawlessly laid out.
+const SYSTEM = `You are an Elite Senior Frontend Engineer performing a deep production code audit and fix.
+You receive a React HTML file (CDN build, all-in-one). Your ONLY job: return a 100% working version.
 
-Review the HTML and make structural improvements:
-1. Ensure the Hero Section has an incredibly strong, benefit-driven H1 headline and a clear CTA button above the fold.
-2. Fix any unaligned or messy elements, ensuring CSS Grid / Flexbox layouts are perfectly proportioned.
-3. Enhance the visual hierarchy: make primary buttons pop, soften secondary text, and add plenty of breathing room (whitespace).
-4. Introduce trust signals (testimonials, guarantees, clean logos) if they are missing or poorly placed.
-5. Fix any JavaScript or React component syntax errors to ensure flawless rendering.
+COMPLETE FIX CHECKLIST — fix every single one:
 
-Return ONLY the deeply optimized, high-converting raw HTML code. Do not add markdown backticks.`;
+JAVASCRIPT ERRORS:
+- All variables must be declared before use
+- No undefined references — every import/variable must exist
+- No missing closing brackets, braces, or parentheses
+- All React hooks (useState, useEffect, useRef) imported from React
+- Arrow functions with correct syntax: const fn = () => {}
+- Array.map() always returns JSX
+- Ternary operators properly terminated
+- No 'const' inside switch cases — use block scopes {}
+- setTimeout/setInterval always have matching clearTimeout/clearInterval in cleanup
+- Promise chains: .then().catch() or async/await with try/catch
 
-/**
- * @param {string} previewHtml — CDN preview HTML from Agent 3
- * @returns {Promise<string>} High-converting HTML
- */
-export async function runFixer(previewHtml) {
+REACT COMPONENT ERRORS:
+- ReactDOM.createRoot(document.getElementById('root')).render(<App />)
+- All components start with uppercase letter
+- JSX: className not class, htmlFor not for, onClick not onclick
+- All self-closing tags: <img />, <br />, <input />
+- Keys on all list items: list.map((item, i) => <div key={i}>)
+- No hooks called conditionally — hooks always at top of component
+- No State updates during render — only in event handlers or effects
+- useEffect dependency arrays must include all referenced state/props
+
+THREE.JS ERRORS:
+- renderer, scene, camera, geometry, material all defined before use
+- Animation loop: requestAnimationFrame stored for cleanup
+- ResizeObserver or window.addEventListener('resize', ...) with removeEventListener cleanup
+- renderer.dispose() on unmount
+- canvas appended to DOM correctly
+
+CSS ERRORS:
+- All CSS custom properties used in CSS also defined in :root
+- No unclosed CSS rules — every { has a matching }
+- Flexbox/Grid: no conflicting display properties
+- z-index conflicts resolved — modal/overlay > nav > content
+- Position: fixed/absolute elements have top/left or transform defined
+- overflow-hidden on containers that need it
+- No missing semicolons after property values
+
+STRUCTURAL FIXES:
+- All Google Font <link> tags in <head> before <style>
+- All CDN <script> tags in correct order: React → ReactDOM → Babel → THREE
+- Script with type="text/babel" is LAST script tag
+- <div id="root"> exists in body
+- No duplicate IDs in HTML
+
+QUALITY IMPROVEMENTS (do these too):
+- Hero section has a strong, benefit-driven H1
+- Primary CTA button is above the fold and visually dominant
+- Navigation is sticky/fixed with proper z-index
+- Footer has contact info placeholders [Email] [Phone]
+- Sections have consistent padding (min 60px vertical)
+- Mobile responsive: @media (max-width: 768px) rules present
+
+Return ONLY the complete, fixed, working HTML. No markdown fences. No explanations. Just the full HTML.`;
+
+export async function runFixer(previewHtml, onFileGenerated = null) {
   if (!previewHtml) return previewHtml;
+
+  if (onFileGenerated) onFileGenerated("fixer", "[PREVIEW]", "Running deep error fix pass...", "running");
 
   try {
     const raw = await callAI(
-      MODELS.primary, // Using minimax primary model for deep optimization
-      [{ role: "user", content: `Please optimize this React HTML structure for maximum conversion rates and fix any structural flaws:\n\n${previewHtml}` }],
-      SYSTEM,
+      "openai/gpt-oss-120b:free",
+      [
+        {
+          role: "user",
+          content: `Perform a complete audit and fix of this React HTML. Return the full fixed HTML:\n\n${previewHtml}`,
+        },
+      ],
+      SYSTEM
     );
-    return extractHtml(raw) || previewHtml;
+
+    const fixed = extractHtml(raw) || previewHtml;
+
+    if (onFileGenerated) onFileGenerated("fixer", "[PREVIEW]", fixed, "done");
+
+    return fixed;
   } catch (e) {
-    console.warn("[optimizer] Failed, using original preview:", e.message);
+    console.warn("[fixer] Failed, using original preview:", e.message);
+    if (onFileGenerated) onFileGenerated("fixer", "[PREVIEW]", previewHtml, "done");
     return previewHtml;
   }
 }

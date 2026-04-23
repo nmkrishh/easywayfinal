@@ -1,6 +1,6 @@
-import React, { memo } from "react";
+﻿import React, { memo } from "react";
 
-/* App builder templates — text labels only, no emojis */
+/* App builder templates â€” text labels only, no emojis */
 const APP_TEMPLATES = [
   { id: "ecommerce",  label: "Shop",      title: "E-Commerce App",    prompt: "Build me a modern e-commerce app with product listings, cart, Razorpay checkout, and order tracking." },
   { id: "restaurant", label: "Menu",      title: "Restaurant App",    prompt: "Create a restaurant app with menu browsing, table reservations, food ordering, and delivery tracking." },
@@ -24,7 +24,7 @@ const WEB_TEMPLATES = [
   { id: "waitlist",  label: "Wait",    title: "Viral Waitlist",  prompt: "Create a viral waitlist page with email capture, referral tracking dashboard, and gamified milestones." },
 ];
 
-/* Each card manages its own hover via DOM refs — zero parent re-renders */
+/* Each card manages its own hover via DOM refs â€” zero parent re-renders */
 const TemplateCard = memo(({ t, c, onPick }) => {
   const ref = React.useRef(null);
 
@@ -65,20 +65,20 @@ const TemplateCard = memo(({ t, c, onPick }) => {
         fontSize: "0.65rem", fontWeight: 700,
         letterSpacing: "0.06em", textTransform: "uppercase",
         color: c.accent, marginBottom: "0.55rem",
-        fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+        fontFamily: "var(--font-body)",
       }}>
         {t.label}
       </div>
 
       <div style={{
-        fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+        fontFamily: "var(--font-body)",
         fontWeight: 700, fontSize: "0.88rem", color: c.text, marginBottom: "0.2rem",
       }}>
         {t.title}
       </div>
       <div style={{
         fontSize: "0.72rem", color: c.muted,
-        fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+        fontFamily: "var(--font-body)",
       }}>
         Use template
       </div>
@@ -86,7 +86,7 @@ const TemplateCard = memo(({ t, c, onPick }) => {
   );
 });
 
-/* Generic section — accepts a templates array via prop */
+/* Generic section â€” accepts a templates array via prop */
 const TemplatesSection = memo(({ c, onPick, variant }) => {
   const templates = variant === "web" ? WEB_TEMPLATES : APP_TEMPLATES;
   const sectionLabel = variant === "web" ? "Web Templates" : "App Templates";
@@ -95,7 +95,7 @@ const TemplatesSection = memo(({ c, onPick, variant }) => {
     <div style={{ padding: "2rem 0 6rem" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.1rem" }}>
         <span style={{
-          fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+          fontFamily: "var(--font-body)",
           fontWeight: 700, fontSize: "0.82rem",
           color: c.text, letterSpacing: "0.04em", textTransform: "uppercase",
         }}>
@@ -104,7 +104,7 @@ const TemplatesSection = memo(({ c, onPick, variant }) => {
         <span style={{ flex: 1, height: 1, background: c.border }} />
         <span style={{
           fontSize: "0.72rem", color: c.muted,
-          fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+          fontFamily: "var(--font-body)",
         }}>
           Click to use
         </span>
@@ -126,3 +126,4 @@ const TemplatesSection = memo(({ c, onPick, variant }) => {
 TemplatesSection.displayName = "TemplatesSection";
 export { APP_TEMPLATES, WEB_TEMPLATES };
 export default TemplatesSection;
+

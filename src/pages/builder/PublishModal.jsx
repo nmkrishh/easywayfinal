@@ -1,7 +1,7 @@
-import React, { memo, useState } from "react";
+﻿import React, { memo, useState } from "react";
 
 /**
- * PublishModal — success overlay shown after a website is successfully published.
+ * PublishModal â€” success overlay shown after a website is successfully published.
  * Includes AI Feedback loop (RAG) to learn from user generation ratings.
  */
 
@@ -63,7 +63,7 @@ const PublishModal = memo(({ c, url, storename, onClose }) => {
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (_) {
+    } catch {
       const el = document.getElementById("ew-pub-url-input");
       if (el) { el.select(); document.execCommand("copy"); }
       setCopied(true);
@@ -121,10 +121,10 @@ const PublishModal = memo(({ c, url, storename, onClose }) => {
         </div>
 
         <div style={{ textAlign: "center" }}>
-          <h2 style={{ fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 800, fontSize: "1.35rem", color: c.text, letterSpacing: "-0.03em", margin: "0 0 0.4rem" }}>
+          <h2 style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "1.35rem", color: c.text, letterSpacing: "-0.03em", margin: "0 0 0.4rem" }}>
             Your site is live
           </h2>
-          <p style={{ fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontSize: "0.85rem", color: c.muted, margin: 0, lineHeight: 1.6 }}>
+          <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: c.muted, margin: 0, lineHeight: 1.6 }}>
             Published at <strong style={{ color: c.text }}>{storename}</strong>.
           </p>
         </div>
@@ -144,7 +144,7 @@ const PublishModal = memo(({ c, url, storename, onClose }) => {
               background: copied ? (c.dark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)") : (c.dark ? "rgba(255,255,255,0.9)" : "rgba(0,0,0,0.88)"),
               color: copied ? c.text : (c.dark ? "#0a0a0a" : "#f5f5f5"),
               border: "none", borderRadius: 10, padding: "0.6rem 1rem", cursor: "pointer",
-              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 600, fontSize: "0.8rem",
+              fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "0.8rem",
               flexShrink: 0, display: "flex", alignItems: "center", gap: "0.35rem", transition: "all 0.2s",
             }}
           >
@@ -205,7 +205,7 @@ const PublishModal = memo(({ c, url, storename, onClose }) => {
           onClick={onClose}
           style={{
             background: "none", border: `1px solid ${c.border}`, borderRadius: 100,
-            padding: "0.5rem 1.5rem", cursor: "pointer", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+            padding: "0.5rem 1.5rem", cursor: "pointer", fontFamily: "var(--font-body)",
             fontSize: "0.82rem", color: c.muted, marginTop: "0.2rem",
           }}
         >
@@ -218,3 +218,4 @@ const PublishModal = memo(({ c, url, storename, onClose }) => {
 
 PublishModal.displayName = "PublishModal";
 export default PublishModal;
+

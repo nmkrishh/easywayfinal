@@ -6,7 +6,7 @@ const inputStyle = (theme) => ({
   width: "100%", padding: "0.75rem 1rem", borderRadius: 12,
   background: theme.dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
   border: `1px solid ${theme.border}`, color: theme.text,
-  fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontSize: "0.95rem", outline: "none",
+  fontFamily: "var(--font-body)", fontSize: "0.95rem", outline: "none",
 });
 
 const ConvertPage = memo(({ theme, onBack, onSuccess }) => {
@@ -14,7 +14,11 @@ const ConvertPage = memo(({ theme, onBack, onSuccess }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ appName: "", websiteUrl: "", name: "", email: "", phone: "" });
+  const [form, setForm] = useState({ 
+    appName: "", websiteUrl: "", name: "", email: "", phone: "",
+    enablePush: false, enableSplash: false, splashText: "", splashColor: "#534AB7",
+    enableBottomNav: false, navItems: [{label: "", path: ""}, {label: "", path: ""}, {label: "", path: ""}]
+  });
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -28,7 +32,15 @@ const ConvertPage = memo(({ theme, onBack, onSuccess }) => {
     setSubmitting(true);
     try {
       const fd = new FormData();
-      Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+      const payload = {
+        ...form,
+        app_name: form.appName,
+        web_url: form.websiteUrl,
+        navItems: JSON.stringify(form.navItems)
+      };
+      delete payload.appName;
+      delete payload.websiteUrl;
+      Object.entries(payload).forEach(([k, v]) => fd.append(k, v));
       fd.append("submitted_at", new Date().toISOString());
       if (selectedFile) fd.append("icon", selectedFile, selectedFile.name);
       await fetch(N8N_WEBHOOK_URL, { method: "POST", body: fd });
@@ -53,14 +65,26 @@ const ConvertPage = memo(({ theme, onBack, onSuccess }) => {
     </div>
   );
 
+  const toggle = (field, label) => (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem", background: theme.surface, padding: "1rem", borderRadius: 12, border: `1px solid ${theme.border}` }}>
+      <label style={{ fontSize: "0.95rem", fontWeight: 500, color: theme.text }}>{label}</label>
+      <input
+        type="checkbox"
+        checked={form[field]}
+        onChange={e => setForm(p => ({ ...p, [field]: e.target.checked }))}
+        style={{ cursor: "pointer", width: 20, height: 20, accentColor: theme.accent }}
+      />
+    </div>
+  );
+
   return (
     <div style={{ minHeight: "100vh", padding: "7rem 2rem 4rem", zIndex: 2, position: "relative" }}>
       <div style={{ maxWidth: 680, margin: "0 auto" }}>
-        <button onClick={onBack} style={{ background: "none", border: "none", color: theme.muted, cursor: "pointer", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.4rem", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontSize: "0.9rem" }}>
+        <button onClick={onBack} style={{ background: "none", border: "none", color: theme.muted, cursor: "pointer", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.4rem", fontFamily: "var(--font-body)", fontSize: "0.9rem" }}>
           ← Back
         </button>
 
-        <h1 style={{ fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontSize: "2.5rem", fontWeight: 800, color: theme.text, marginBottom: "0.5rem", letterSpacing: "-0.03em" }}>Convert Your Website</h1>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "2.8rem", fontWeight: 500, color: theme.text, marginBottom: "0.5rem", letterSpacing: "-0.03em" }}>Convert Your Website</h1>
         <p style={{ color: theme.muted, marginBottom: "2.5rem" }}>Fill in the details below and we'll start building your app.</p>
 
         {/* Step indicator */}
@@ -99,11 +123,52 @@ const ConvertPage = memo(({ theme, onBack, onSuccess }) => {
                 )}
               </div>
 
+              {toggle("enablePush", "Enable Push Notifications")}
+
+              {toggle("enableSplash", "Enable Splash Screen")}
+              {form.enableSplash && (
+                <div style={{ paddingLeft: "1rem", borderLeft: `2px solid ${theme.border}`, marginBottom: "1.5rem", marginTop: "-0.5rem" }}>
+                  {inp("splashText", "Splash Screen Text", "text", "My App Name")}
+                  {inp("splashColor", "Splash Screen Background Color", "color")}
+                </div>
+              )}
+
+              {toggle("enableBottomNav", "Enable Bottom Navigation Bar")}
+              {form.enableBottomNav && (
+                <div style={{ paddingLeft: "1rem", borderLeft: `2px solid ${theme.border}`, marginBottom: "1.5rem", marginTop: "-0.5rem" }}>
+                  <p style={{ fontSize: "0.8rem", color: theme.muted, marginBottom: "1rem" }}>Configure up to 3 navigation items.</p>
+                  {[0, 1, 2].map(i => (
+                    <div key={i} style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                      <input
+                        type="text" placeholder={`Tab ${i+1} Label`}
+                        value={form.navItems[i].label}
+                        onChange={e => {
+                          const newItems = [...form.navItems];
+                          newItems[i].label = e.target.value;
+                          setForm(p => ({ ...p, navItems: newItems }));
+                        }}
+                        style={{ ...inputStyle(theme), marginBottom: 0, padding: "0.5rem" }}
+                      />
+                      <input
+                        type="text" placeholder={`Path (e.g. /home)`}
+                        value={form.navItems[i].path}
+                        onChange={e => {
+                          const newItems = [...form.navItems];
+                          newItems[i].path = e.target.value;
+                          setForm(p => ({ ...p, navItems: newItems }));
+                        }}
+                        style={{ ...inputStyle(theme), marginBottom: 0, padding: "0.5rem" }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <button onClick={() => { if (!form.appName || !form.websiteUrl) { alert("Fill required fields"); return; } setStep(2); }} style={{
                 width: "100%", padding: "0.85rem", borderRadius: 14,
                 background: theme.accentBtnBg,
                 color: theme.accentBtnText, border: "none", cursor: "pointer",
-                fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 600, fontSize: "1rem",
+                fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "1rem",
               }}>
                 Continue →
               </button>
@@ -111,7 +176,7 @@ const ConvertPage = memo(({ theme, onBack, onSuccess }) => {
           ) : (
             <>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1rem", background: theme.accentBg, border: `1px solid ${theme.accentBorder}`, borderRadius: 12, marginBottom: "1.5rem", fontSize: "0.88rem", color: theme.muted }}>
-                <CheckCircle2 size={16} color="#10b981" /> App details saved. Now add your contact info.
+                <CheckCircle2 size={16} color={theme.accent} /> App details saved. Now add your contact info.
               </div>
               {inp("name", "Your Name *", "text", "Krishna")}
               {inp("email", "Email Address *", "email", "krishna@example.com")}
@@ -121,7 +186,7 @@ const ConvertPage = memo(({ theme, onBack, onSuccess }) => {
                   flex: 1, padding: "0.85rem", borderRadius: 14,
                   background: "transparent", border: `1px solid ${theme.border}`,
                   color: theme.text, cursor: "pointer",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 600, fontSize: "1rem",
+                  fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "1rem",
                 }}>
                   ← Back
                 </button>
@@ -129,7 +194,7 @@ const ConvertPage = memo(({ theme, onBack, onSuccess }) => {
                   flex: 2, padding: "0.85rem", borderRadius: 14,
                   background: theme.accentBtnBg,
                   color: theme.accentBtnText, border: "none", cursor: "pointer",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 600, fontSize: "1rem",
+                  fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "1rem",
                   opacity: submitting ? 0.7 : 1,
                   display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
                 }}>

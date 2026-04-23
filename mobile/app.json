@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "EasyWay Mobile",
+    "slug": "easyway-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "package": "com.easyway.mobile"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "677dbf2f-09c8-4bf2-8277-bb64fa7b93df"
+      }
+    }
+  }
+}

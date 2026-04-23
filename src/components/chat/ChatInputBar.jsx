@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+﻿import React, { memo } from "react";
 
 /* Image thumbnail row */
 const ImageRow = memo(({ imgs, removeImg, c }) => {
@@ -19,7 +19,7 @@ const ImageRow = memo(({ imgs, removeImg, c }) => {
               background: c.text, color: c.bg, border: "none",
               cursor: "pointer", fontSize: "0.55rem",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontWeight: 700, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+              fontWeight: 700, fontFamily: "var(--font-body)",
             }}
           >x</button>
         </div>
@@ -55,14 +55,14 @@ const ChatInputBar = memo(({
           border: `1px solid ${c.border}`,
           borderRadius: 16, padding: "0.45rem 0.45rem 0.45rem 0.85rem",
         }}>
-          {/* Attach button — text icon */}
+          {/* Attach button â€” text icon */}
           <button
             onClick={() => fileRef.current?.click()}
             title="Attach images"
             style={{
               background: "none", border: "none", cursor: "pointer",
               color: c.muted,
-              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: "0.72rem", fontWeight: 600,
               letterSpacing: "0.04em", padding: "6px 8px",
               display: "flex", alignItems: "center", flexShrink: 0,
@@ -79,7 +79,7 @@ const ChatInputBar = memo(({
             onChange={onFiles}
           />
 
-          {/* Templates toggle — only visible after chat starts */}
+          {/* Templates toggle â€” only visible after chat starts */}
           {hasChat && (
             <button
               onClick={() => setShowTemplates((v) => !v)}
@@ -89,7 +89,7 @@ const ChatInputBar = memo(({
                 border: showTemplates ? `1px solid ${c.accentBorder}` : "1px solid transparent",
                 cursor: "pointer",
                 color: showTemplates ? c.text : c.muted,
-                fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+                fontFamily: "var(--font-body)",
                 fontSize: "0.72rem", fontWeight: 600,
                 letterSpacing: "0.04em", padding: "5px 8px",
                 display: "flex", alignItems: "center", flexShrink: 0,
@@ -105,18 +105,18 @@ const ChatInputBar = memo(({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder={placeholder || "Describe your idea…"}
+            placeholder={placeholder || "Describe your ideaâ€¦"}
             rows={1}
             style={{
               flex: 1, border: "none", outline: "none", resize: "none",
               background: "transparent", color: c.text,
-              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: "0.94rem", lineHeight: 1.55,
               maxHeight: 160, overflowY: "auto", padding: "4px 0",
             }}
           />
 
-          {/* Send button — arrow text instead of emoji */}
+          {/* Send button â€” arrow text instead of emoji */}
           <button
             onClick={send}
             disabled={!canSend}
@@ -130,7 +130,7 @@ const ChatInputBar = memo(({
               fontSize: "1rem", flexShrink: 0,
               fontWeight: 700,
               transition: "background 0.15s, color 0.15s",
-              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+              fontFamily: "var(--font-body)",
             }}
           >
             &uarr;
@@ -140,7 +140,7 @@ const ChatInputBar = memo(({
         <div style={{ textAlign: "center", marginTop: "0.4rem" }}>
           <span style={{
             fontSize: "0.67rem", color: c.muted,
-            fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+            fontFamily: "var(--font-body)",
           }}>
             Enter to send &middot; Shift+Enter for new line
           </span>
@@ -152,3 +152,4 @@ const ChatInputBar = memo(({
 
 ChatInputBar.displayName = "ChatInputBar";
 export default ChatInputBar;
+

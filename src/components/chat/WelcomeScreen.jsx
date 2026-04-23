@@ -1,6 +1,6 @@
-import React, { memo } from "react";
+﻿import React, { memo } from "react";
 
-/* Chip — isolated hover state so parent never re-renders from hover */
+/* Chip â€” isolated hover state so parent never re-renders from hover */
 const Chip = memo(({ label, c, onClick }) => {
   const ref = React.useRef(null);
 
@@ -28,7 +28,7 @@ const Chip = memo(({ label, c, onClick }) => {
         background: "transparent",
         border: `1px solid ${c.border}`,
         color: c.muted,
-        fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+        fontFamily: "var(--font-body)",
         fontSize: "0.83rem",
         cursor: "pointer",
         transition: "background 0.15s, border-color 0.15s, color 0.15s",
@@ -51,13 +51,13 @@ const WelcomeScreen = memo(({ c, chips, onChip, title, subtitle, badgeLabel }) =
       fontSize: "0.72rem", fontWeight: 700,
       letterSpacing: "0.08em", textTransform: "uppercase",
       color: c.accent, marginBottom: "1.5rem",
-      fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+      fontFamily: "var(--font-body)",
     }}>
       {badgeLabel || "AI Assistant"}
     </div>
 
     <h2 style={{
-      fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+      fontFamily: "var(--font-body)",
       fontWeight: 800, fontSize: "1.85rem", color: c.text,
       marginBottom: "0.6rem", letterSpacing: "-0.03em",
       margin: "0 0 0.6rem",
@@ -68,7 +68,7 @@ const WelcomeScreen = memo(({ c, chips, onChip, title, subtitle, badgeLabel }) =
     <p style={{
       color: c.muted, fontSize: "1rem", lineHeight: 1.65,
       marginBottom: "2rem", margin: "0 0 2rem",
-      fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+      fontFamily: "var(--font-body)",
     }}>
       {subtitle || "Describe your idea, upload screenshots, or pick a template below."}
     </p>
@@ -83,3 +83,4 @@ const WelcomeScreen = memo(({ c, chips, onChip, title, subtitle, badgeLabel }) =
 
 WelcomeScreen.displayName = "WelcomeScreen";
 export default WelcomeScreen;
+

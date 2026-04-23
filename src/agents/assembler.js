@@ -1,48 +1,89 @@
-/**
- * Agent 8 — Assembler
- * Merges frontend files + backend files into one projectFiles map.
- * Also injects React Native code into files if present.
- * No AI call needed — pure JS merge operation.
- */
+import { callAI, MODELS } from "./callAI.js";
 
-/**
- * @param {string}                fixedPreview  — fixed CDN preview HTML
- * @param {Record<string,string>} frontendFiles — from Agent 3
- * @param {Record<string,string>} backendFiles  — from Agent 5
- * @param {string}                [nativeCode]  — from Agent 4 (optional)
- * @returns {{ preview: string, projectFiles: Record<string,string> }}
- */
+const ASSEMBLER_SYSTEM = `You are a Senior Full-Stack Engineer performing a final cross-file consistency check and fix.
+You receive all the project files. Your job: fix any cross-file issues and return the corrected files.
+
+CROSS-FILE CONSISTENCY CHECKS:
+- All import paths match actual file paths (e.g., import Navbar from './Navbar.jsx' file must exist)
+- CSS class names used in JSX must be defined somewhere in the CSS files
+- React Router routes in App.jsx must match exported component names
+- API endpoint URLs in frontend must match routes defined in backend
+- Environment variables used in code must exist in .env.example
+- package.json dependencies must include every package imported in code
+- vite.config.js path aliases must match actual directory structure
+
+OUTPUT FORMAT — return only the corrected files that changed:
+[FILE path="..."]
+...corrected content...
+[/FILE]
+
+If a file has no issues, do NOT output it.
+No explanations. No markdown. Only [FILE] blocks for changed files.`;
+
 export async function runAssembler(
   fixedPreview,
   frontendFiles = {},
-  backendFiles  = {},
-  nativeCode    = "",
+  backendFiles = {},
+  nativeCode = "",
+  onFileGenerated = null
 ) {
-  // Merge all project files
-  const projectFiles = {
-    ...frontendFiles,
-    ...backendFiles,
-  };
+  const projectFiles = { ...frontendFiles, ...backendFiles };
 
-  // Inject React Native code as a file if it exists
   if (nativeCode) {
     projectFiles["mobile/App.js"] = nativeCode;
-    projectFiles["mobile/README.md"] =
-      "# React Native App (Expo)\n\nThis mobile app was generated alongside the web project.\n\n```bash\nnpm install\nnpx expo start\n```\n";
+    projectFiles["mobile/README.md"] = "# React Native App (Expo)\n\n```bash\nnpm install\nnpx expo start\n```\n";
   }
 
-  // Add a root-level README if not already present
   if (!projectFiles["README.md"]) {
-    const name = Object.keys(backendFiles).length > 0 ? "MERN Stack" : "React";
-    projectFiles["README.md"] = generateReadme(name, projectFiles);
+    projectFiles["README.md"] = generateReadme(projectFiles);
+  }
+
+  if (onFileGenerated) {
+    for (const [filePath] of Object.entries(projectFiles)) {
+      onFileGenerated("assembler", filePath, projectFiles[filePath], "running");
+    }
+  }
+
+  try {
+    const fileContext = Object.entries(projectFiles)
+      .slice(0, 20)
+      .map(([path, content]) => `[FILE path="${path}"]\n${content.slice(0, 2000)}\n[/FILE]`)
+      .join("\n");
+
+    const raw = await callAI(
+      MODELS.fast,
+      [
+        {
+          role: "user",
+          content: `Check these project files for cross-file consistency issues and return corrected versions:\n\n${fileContext}`,
+        },
+      ],
+      ASSEMBLER_SYSTEM
+    );
+
+    const fixedFileRe = /\[FILE path="([^"]+)"\]([\s\S]+?)\[\/FILE\]/g;
+    let m;
+    while ((m = fixedFileRe.exec(raw)) !== null) {
+      const [, filePath, content] = m;
+      projectFiles[filePath.trim()] = content.trim();
+    }
+  } catch (e) {
+    console.warn("[assembler] AI validation pass failed, proceeding with merge:", e.message);
+  }
+
+  if (onFileGenerated) {
+    for (const [filePath, content] of Object.entries(projectFiles)) {
+      onFileGenerated("assembler", filePath, content, "done");
+    }
   }
 
   return { preview: fixedPreview, projectFiles };
 }
 
-function generateReadme(stackName, files) {
-  const hasBackend = Object.keys(files).some(k => k.startsWith("server/"));
-  const hasMobile  = Object.keys(files).some(k => k.startsWith("mobile/"));
+function generateReadme(files) {
+  const hasBackend = Object.keys(files).some((k) => k.startsWith("server/"));
+  const hasMobile = Object.keys(files).some((k) => k.startsWith("mobile/"));
+  const stackName = hasBackend ? "MERN Stack" : "React";
 
   return `# ${stackName} Project
 
@@ -62,26 +103,33 @@ cd client
 npm install
 npm run dev
 \`\`\`
-${hasBackend ? `
+${
+  hasBackend
+    ? `
 ### Server (Node.js + Express + MongoDB)
 \`\`\`bash
 cd server
 npm install
 cp .env.example .env
-# Edit .env with your MongoDB URI
 npm run dev
-\`\`\`` : ""}
-${hasMobile ? `
+\`\`\``
+    : ""
+}
+${
+  hasMobile
+    ? `
 ### Mobile (Expo React Native)
 \`\`\`bash
 cd mobile
 npm install
 npx expo start
-\`\`\`` : ""}
+\`\`\``
+    : ""
+}
 
 ## Tech Stack
-- **Frontend**: React 18, Vite, Three.js, React Router
+- **Frontend**: React 18, Vite, Three.js, React Router v6
 - **Backend**: Node.js, Express, MongoDB, Mongoose
-- **Styling**: CSS Custom Properties (monochrome by default)
+- **Styling**: CSS Custom Properties
 `;
 }

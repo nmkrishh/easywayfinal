@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+﻿import React, { memo } from "react";
 import { PartyPopper } from "lucide-react";
 
 const SuccessModal = memo(({ theme, onClose }) => (
@@ -13,13 +13,13 @@ const SuccessModal = memo(({ theme, onClose }) => (
       <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem", color: theme.accent }}>
         <PartyPopper size={48} strokeWidth={1.5} />
       </div>
-      <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontSize: "1.6rem", fontWeight: 800, color: theme.text, marginBottom: "0.5rem" }}>Request Submitted!</div>
+      <div style={{ fontFamily: "var(--font-body)", fontSize: "1.6rem", fontWeight: 800, color: theme.text, marginBottom: "0.5rem" }}>Request Submitted!</div>
       <div style={{ color: theme.muted, marginBottom: "2rem", lineHeight: 1.6 }}>We've received your request. Your app will be ready in approximately 5-15 minutes. Check your email for updates.</div>
       <button onClick={onClose} style={{
         width: "100%", padding: "0.85rem", borderRadius: 14,
         background: theme.accentBtnBg,
         color: theme.accentBtnText, border: "none", cursor: "pointer",
-        fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 600, fontSize: "1rem",
+        fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "1rem",
       }}>
         Back to Home
       </button>
@@ -28,3 +28,4 @@ const SuccessModal = memo(({ theme, onClose }) => (
 ));
 
 export default SuccessModal;
+

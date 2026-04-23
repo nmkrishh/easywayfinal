@@ -1,12 +1,8 @@
-/**
- * Agent 2 — Structure Orchestrator (Trinity Large)
- * Enhanced prompt → strict JSON MERN project plan
- */
 import { callAI, MODELS } from "./callAI.js";
 
 const SYSTEM = `You are a senior software architect specialising in MERN stack applications.
 Given an enhanced website brief, output a strictly valid JSON project plan.
-Output ONLY valid JSON — no explanation, no markdown, no backticks, no extra text.
+Output ONLY valid JSON — no explanation, no markdown, no backticks, no extra text, no comments.
 
 The JSON must have exactly these fields:
 {
@@ -34,26 +30,29 @@ Rules:
 - Set "react_native" to true ONLY if brief explicitly mentions a mobile app
 - Set "payment" to true ONLY if brief explicitly mentions payments or ecommerce
 - Component names must be PascalCase, single words or short phrases
-- Keep "brandName" exact from the brief (never invent a name)`;
+- Keep "brandName" exact from the brief (never invent a name)
+- Prefer multi-page architecture when requested
+- For ecommerce: include Product, Customer, Order models plus payment/order routes
+- Default stack: React + Tailwind CSS + Express + MongoDB`;
 
-/**
- * @param {string} enhancedBrief
- * @returns {Promise<object>} Parsed MERN project plan
- */
 export async function runStructurer(enhancedBrief) {
   const raw = await callAI(
-    MODELS.agentic,
+    "google/gemma-4-31b-it:free",
     [{ role: "user", content: `Website brief:\n${enhancedBrief}` }],
-    SYSTEM,
+    SYSTEM
   );
 
   const clean = raw.replace(/```[\w]*\n?/g, "").trim();
   try {
     return JSON.parse(clean);
-  } catch (_) {
+  } catch {
     const match = clean.match(/\{[\s\S]+\}/);
     if (match) {
-      try { return JSON.parse(match[0]); } catch (_) {}
+      try {
+        return JSON.parse(match[0]);
+      } catch {
+        // intentional
+      }
     }
     console.warn("[structurer] JSON parse failed, using defaults");
     return {

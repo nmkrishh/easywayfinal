@@ -1,16 +1,42 @@
-import React, { memo, useState, useEffect } from "react";
+import React, { memo } from "react";
+import { getAuthToken } from "../../lib/auth";
 
 /**
  * BuilderTopBar
  * Sticky top bar for the split-screen builder page.
- * Shows: back button | logo + badge | puter auth | publish button | live URL
+ * Shows: back button | logo + badge | publish button | live URL
  */
-const BuilderTopBar = memo(({ c, onBack, onPublish, publishing, liveUrl, hasContent, htmlContent = "", projectFiles = {} }) => {
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+
+const BuilderTopBar = memo(({ c, onBack, onPublish, publishing, liveUrl, htmlContent = "", projectFiles = {}, projectId = null }) => {
+
+
+  const storeZipOnServer = async () => {
+    const token = getAuthToken();
+    if (!projectId || !token) return;
+
+    const res = await fetch(`${API_BASE}/api/projects/${projectId}/store-zip`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ projectFiles, htmlContent }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to store ZIP on server");
+    }
+  };
 
   const downloadCode = async () => {
     const fileKeys = Object.keys(projectFiles);
     if (!fileKeys.length) return;
     try {
+      // Store a server copy first, then continue local browser download.
+      await storeZipOnServer().catch(() => {});
+
       const JSZip = (await import("https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm")).default;
       const zip = new JSZip();
       
@@ -45,7 +71,7 @@ const BuilderTopBar = memo(({ c, onBack, onPublish, publishing, liveUrl, hasCont
         justifyContent: "space-between",
         padding: "0 1.25rem",
         height: 52,
-        background: c.glassBar,
+        background: "transparent",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
         borderBottom: `1px solid ${c.border}`,
@@ -62,7 +88,7 @@ const BuilderTopBar = memo(({ c, onBack, onPublish, publishing, liveUrl, hasCont
             border: "none",
             cursor: "pointer",
             color: c.muted,
-            fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+            fontFamily: "var(--font-body)",
             fontSize: "0.82rem",
             display: "flex",
             alignItems: "center",
@@ -71,7 +97,7 @@ const BuilderTopBar = memo(({ c, onBack, onPublish, publishing, liveUrl, hasCont
             flexShrink: 0,
           }}
         >
-          ← Back
+          â† Back
         </button>
 
         <span style={{ width: 1, height: 18, background: c.border, display: "inline-block", flexShrink: 0 }} />
@@ -88,7 +114,7 @@ const BuilderTopBar = memo(({ c, onBack, onPublish, publishing, liveUrl, hasCont
             letterSpacing: "0.07em",
             textTransform: "uppercase",
             color: c.accent,
-            fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+            fontFamily: "var(--font-body)",
             flexShrink: 0,
           }}
         >
@@ -97,7 +123,7 @@ const BuilderTopBar = memo(({ c, onBack, onPublish, publishing, liveUrl, hasCont
 
         <span
           style={{
-            fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+            fontFamily: "var(--font-body)",
             fontWeight: 700,
             fontSize: "0.9rem",
             color: c.text,
@@ -109,19 +135,16 @@ const BuilderTopBar = memo(({ c, onBack, onPublish, publishing, liveUrl, hasCont
         </span>
       </div>
 
-      {/* Right: puter auth + live URL + publish button */}
+      {/* Right: live URL + publish button */}
       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-
-        {/* Puter auth */}
-        <BuilderPuterAuth c={c} />
-
+        
         {liveUrl && (
           <a
             href={liveUrl}
             target="_blank"
             rel="noreferrer"
             style={{
-              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: "0.75rem",
               color: "#4ade80",
               textDecoration: "none",
@@ -133,7 +156,7 @@ const BuilderTopBar = memo(({ c, onBack, onPublish, publishing, liveUrl, hasCont
             }}
             title={liveUrl}
           >
-            ✓ {liveUrl}
+            âœ“ {liveUrl}
           </a>
         )}
 
@@ -149,7 +172,7 @@ const BuilderTopBar = memo(({ c, onBack, onPublish, publishing, liveUrl, hasCont
               padding: "0.35rem 0.8rem",
               cursor: "pointer",
               color: c.muted,
-              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: "0.75rem",
               fontWeight: 500,
               transition: "all 0.2s",
@@ -171,6 +194,8 @@ const BuilderTopBar = memo(({ c, onBack, onPublish, publishing, liveUrl, hasCont
           </button>
         )}
 
+
+
         <button
           onClick={onPublish}
           disabled={publishing}
@@ -180,7 +205,7 @@ const BuilderTopBar = memo(({ c, onBack, onPublish, publishing, liveUrl, hasCont
             border: "none",
             borderRadius: 100,
             padding: "0.45rem 1.1rem",
-            fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+            fontFamily: "var(--font-body)",
             fontWeight: 600,
             fontSize: "0.82rem",
             cursor: publishing ? "default" : "pointer",
@@ -205,10 +230,10 @@ const BuilderTopBar = memo(({ c, onBack, onPublish, publishing, liveUrl, hasCont
                   animation: "ewSpin 0.7s linear infinite",
                 }}
               />
-              Publishing…
+              Publishingâ€¦
             </>
           ) : (
-            "Publish →"
+            "Publish â†’"
           )}
         </button>
       </div>
@@ -216,105 +241,7 @@ const BuilderTopBar = memo(({ c, onBack, onPublish, publishing, liveUrl, hasCont
   );
 });
 
-/** Puter auth button styled for the dark builder bar. */
-function BuilderPuterAuth({ c }) {
-  const [user,    setUser]    = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    const check = async () => {
-      try {
-        const p = window.puter;
-        if (!p) { setLoading(false); return; }
-        const ok = await p.auth.isSignedIn();
-        if (ok) {
-          const u = await p.auth.getUser();
-          if (!cancelled) setUser(u);
-        }
-      } catch (_) { /* puter.js not ready */ }
-      finally { if (!cancelled) setLoading(false); }
-    };
-    const t = setTimeout(check, 400);
-    return () => { cancelled = true; clearTimeout(t); };
-  }, []);
-
-  const signIn = async () => {
-    try {
-      await window.puter?.auth.signIn();
-      const u = await window.puter?.auth.getUser();
-      setUser(u);
-    } catch (e) { console.error("Puter sign-in:", e); }
-  };
-
-  const signOut = async () => {
-    try {
-      await window.puter?.auth.signOut();
-      setUser(null);
-    } catch (e) { console.error("Puter sign-out:", e); }
-  };
-
-  if (loading) return null;
-
-  const btnStyle = {
-    background: "none",
-    border: `1px solid ${c.border}`,
-    borderRadius: 100,
-    padding: "0.35rem 0.85rem",
-    cursor: "pointer",
-    color: c.muted,
-    fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
-    fontSize: "0.78rem",
-    fontWeight: 500,
-    display: "flex",
-    alignItems: "center",
-    gap: "0.35rem",
-    transition: "all 0.2s",
-    whiteSpace: "nowrap",
-    flexShrink: 0,
-  };
-
-  if (user) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
-        <span style={{
-          fontSize: "0.75rem",
-          color: c.muted,
-          fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
-          maxWidth: 90,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-        }}>
-          {user.username}
-        </span>
-        <button
-          onClick={signOut}
-          style={btnStyle}
-          onMouseEnter={e => { e.currentTarget.style.color = c.text; e.currentTarget.style.borderColor = c.accent; }}
-          onMouseLeave={e => { e.currentTarget.style.color = c.muted; e.currentTarget.style.borderColor = c.border; }}
-        >
-          Sign Out
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <button
-      onClick={signIn}
-      style={{ ...btnStyle, color: c.text }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = c.accent; e.currentTarget.style.color = c.accent; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = c.border; e.currentTarget.style.color = c.text; }}
-    >
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-      </svg>
-      Sign in with Puter
-    </button>
-  );
-}
-
 BuilderTopBar.displayName = "BuilderTopBar";
 export default BuilderTopBar;
+
 

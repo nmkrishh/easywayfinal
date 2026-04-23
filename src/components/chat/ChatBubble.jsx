@@ -1,24 +1,24 @@
-import React, { memo } from "react";
+﻿import React, { memo } from "react";
 
-/* AI avatar — clean monogram instead of emoji */
+/* AI avatar â€” clean monogram instead of emoji */
 const AIAvatar = ({ c }) => (
   <div style={{
     width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
     background: c.surface, border: `1px solid ${c.border}`,
     display: "flex", alignItems: "center", justifyContent: "center",
     fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.04em",
-    color: c.muted, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+    color: c.muted, fontFamily: "var(--font-body)",
   }}>AI</div>
 );
 
-/* User avatar — clean monogram */
+/* User avatar â€” clean monogram */
 const UserAvatar = ({ c }) => (
   <div style={{
     width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
     background: c.accentBg, border: `1px solid ${c.accentBorder}`,
     display: "flex", alignItems: "center", justifyContent: "center",
     fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.04em",
-    color: c.text, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+    color: c.text, fontFamily: "var(--font-body)",
   }}>You</div>
 );
 
@@ -44,7 +44,7 @@ const ChatBubble = memo(({ msg, c }) => {
             color: isUser ? c.accentBtnText : c.text,
             fontSize: "0.92rem", lineHeight: 1.65,
             whiteSpace: "pre-wrap", wordBreak: "break-word",
-            fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+            fontFamily: "var(--font-body)",
           }}>
             {msg.text}
           </div>
@@ -52,7 +52,7 @@ const ChatBubble = memo(({ msg, c }) => {
         <div style={{
           fontSize: "0.67rem", color: c.muted, marginTop: "0.25rem",
           textAlign: isUser ? "right" : "left",
-          fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+          fontFamily: "var(--font-body)",
         }}>
           {msg.time}
         </div>
@@ -64,3 +64,4 @@ const ChatBubble = memo(({ msg, c }) => {
 
 ChatBubble.displayName = "ChatBubble";
 export default ChatBubble;
+

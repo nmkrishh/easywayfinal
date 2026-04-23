@@ -1,7 +1,7 @@
-import React, { useState, useRef, memo } from "react";
+﻿import React, { useState, useRef, memo } from "react";
 
 /**
- * PreviewPanel — right panel of the split-screen builder.
+ * PreviewPanel â€” right panel of the split-screen builder.
  * Now supports Tabs: "Preview" (iframe) and "Files" (code viewer).
  */
 const DEVICES = [
@@ -32,7 +32,16 @@ const IconFile = () => (
   </svg>
 );
 
-const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating }) => {
+function sanitizePreviewHtml(rawHtml) {
+  const html = String(rawHtml || "");
+  if (!html) return "";
+
+  // Repair a common AI truncation bug: closing JSX/HTML tags missing trailing ">"
+  // Example: "</div" on one line before the next token.
+  return html.replace(/<\/([A-Za-z][\w:-]*)(?=\s*(?:\n|$|<))/g, "</$1>");
+}
+
+const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating, onSchedulePost }) => {
   const [activeTab, setActiveTab] = useState("preview"); // "preview" | "files"
   const [device, setDevice]       = useState("desktop");
   const [key, setKey]             = useState(0);
@@ -42,6 +51,7 @@ const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating }) =>
   const currentDevice = DEVICES.find(d => d.key === device);
   const iframeWidth   = currentDevice.width;
   const fileKeys      = Object.keys(projectFiles).sort();
+  const safeHtmlContent = sanitizePreviewHtml(htmlContent);
 
   // Highlight first file if switching to Files tab and none selected
   React.useEffect(() => {
@@ -51,7 +61,7 @@ const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating }) =>
   }, [activeTab, selectedFile, fileKeys]);
 
   const refresh = () => {
-    if (iframeRef.current) iframeRef.current.srcdoc = htmlContent || "";
+    if (iframeRef.current) iframeRef.current.srcdoc = safeHtmlContent || "";
     setKey(k => k + 1);
   };
 
@@ -68,7 +78,7 @@ const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating }) =>
         borderLeft: `1px solid ${c.border}`,
       }}
     >
-      {/* ── Toolbar ──────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Toolbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div
         style={{
           display: "flex",
@@ -94,7 +104,7 @@ const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating }) =>
               cursor: "pointer",
               color: activeTab === "preview" ? c.text : c.muted,
               fontSize: "0.8rem",
-              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+              fontFamily: "var(--font-body)",
               fontWeight: 600,
             }}
           >
@@ -112,7 +122,7 @@ const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating }) =>
               cursor: hasFiles ? "pointer" : "default",
               color: activeTab === "files" ? c.text : (hasFiles ? c.muted : c.border),
               fontSize: "0.8rem",
-              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+              fontFamily: "var(--font-body)",
               fontWeight: 600,
             }}
           >
@@ -148,7 +158,7 @@ const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating }) =>
                   cursor: "pointer",
                   color: device === d.key ? c.text : c.muted,
                   fontSize: "0.7rem",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontWeight: 600,
                   transition: "background 0.15s, color 0.15s",
                 }}
@@ -173,7 +183,7 @@ const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating }) =>
               cursor: htmlContent ? "pointer" : "default",
               color: htmlContent ? c.muted : c.border,
               fontSize: "0.72rem",
-              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+              fontFamily: "var(--font-body)",
               display: "flex",
               alignItems: "center",
               gap: "0.35rem",
@@ -187,7 +197,7 @@ const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating }) =>
         {activeTab === "preview" && (
           <button
             onClick={() => {
-              const blob = new Blob([htmlContent || ""], { type: "text/html" });
+              const blob = new Blob([safeHtmlContent || ""], { type: "text/html" });
               const url = URL.createObjectURL(blob);
               window.open(url, "_blank");
             }}
@@ -201,7 +211,7 @@ const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating }) =>
               cursor: htmlContent ? "pointer" : "default",
               color: htmlContent ? c.text : c.border,
               fontSize: "0.72rem",
-              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+              fontFamily: "var(--font-body)",
               display: "flex",
               alignItems: "center",
               gap: "0.35rem",
@@ -210,9 +220,29 @@ const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating }) =>
             <IconExternal /> New Tab
           </button>
         )}
+
+        {activeTab === "preview" && (
+          <button
+            onClick={() => onSchedulePost?.()}
+            disabled={!htmlContent}
+            title="Schedule social post"
+            style={{
+              background: "none",
+              border: `1px solid ${c.border}`,
+              borderRadius: 7,
+              padding: "4px 10px",
+              cursor: htmlContent ? "pointer" : "default",
+              color: htmlContent ? c.text : c.border,
+              fontSize: "0.72rem",
+              fontFamily: "var(--font-body)",
+            }}
+          >
+            Schedule Post
+          </button>
+        )}
       </div>
 
-      {/* ── Viewport ──────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Viewport â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {activeTab === "preview" ? (
         // Preview iframe
         <div
@@ -253,15 +283,15 @@ const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating }) =>
                       animation: "ewSpin 0.8s linear infinite",
                     }}
                   />
-                  <p style={{ fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontSize: "0.82rem", color: c.muted, margin: 0 }}>
-                    Generating your MERN project…
+                  <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: c.muted, margin: 0 }}>
+                    Generating your MERN projectâ€¦
                   </p>
                 </>
               ) : (
                 <>
                   <div style={{ width: 48, height: 48, borderRadius: 12, border: `1px solid ${c.border}`, background: c.dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)" }} />
-                  <p style={{ fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontSize: "0.82rem", color: c.muted, textAlign: "center", maxWidth: 220, lineHeight: 1.65, margin: 0 }}>
-                    Describe your site in the chat panel — your live preview will appear here.
+                  <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: c.muted, textAlign: "center", maxWidth: 220, lineHeight: 1.65, margin: 0 }}>
+                    Describe your site in the chat panel â€” your live preview will appear here.
                   </p>
                 </>
               )}
@@ -270,9 +300,9 @@ const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating }) =>
             <iframe
               key={key}
               ref={iframeRef}
-              srcDoc={htmlContent}
+              srcDoc={safeHtmlContent}
               title="Website Preview"
-              sandbox="allow-scripts allow-same-origin allow-forms"
+              sandbox="allow-scripts allow-forms"
               style={{
                 width: typeof iframeWidth === "number" ? iframeWidth : "100%",
                 height: "100%",
@@ -339,3 +369,4 @@ const PreviewPanel = memo(({ c, htmlContent, projectFiles = {}, generating }) =>
 
 PreviewPanel.displayName = "PreviewPanel";
 export default PreviewPanel;
+

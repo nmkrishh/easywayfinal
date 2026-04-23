@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, memo } from "react";
+import AIWebsiteChatInput from "../../components/builder/AIWebsiteChatInput";
 
 /**
- * ChatPanel — left panel of the split-screen builder.
+ * ChatPanel â€” left panel of the split-screen builder.
  * During the intake phase, renders AI-generated questions as clickable chip options.
  */
 
@@ -14,7 +15,39 @@ const TEMPLATES = [
   { label: "Gym / Fitness",    text: "Design an energetic gym website with hero, class schedule, trainer profiles, pricing, and sign-up form. Dark theme with neon accents." },
 ];
 
-// ── Intake question card with chip options ─────────────────────────────────
+const AGENT_LABELS = {
+  enhancer: "Prompt Enhancer",
+  structurer: "Architecture Planner",
+  frontend: "Frontend Builder",
+  nativeApp: "Mobile Builder",
+  backend: "Backend Builder",
+  payment: "Payment Agent",
+  fixer: "Error Fixer",
+  assembler: "Assembler",
+};
+
+function CodeEventCard({ event, c }) {
+  const [expanded, setExpanded] = useState(false);
+  const isPreview = event.fileName === "[PREVIEW]";
+  const statusColor = event.status === "done" ? "#4ade80" : event.status === "running" ? "#facc15" : "#f87171";
+  return (
+    <div style={{ background: c.dark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)", border: `1px solid ${event.status === "done" ? "rgba(74,222,128,0.25)" : event.status === "running" ? "rgba(250,204,21,0.25)" : c.border}`, borderRadius: 7, marginBottom: "0.3rem", overflow: "hidden" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", padding: "0.3rem 0.5rem", cursor: event.preview ? "pointer" : "default" }} onClick={() => event.preview && setExpanded(v => !v)}>
+        <span style={{ fontSize: "0.55rem", color: statusColor, flexShrink: 0 }}>{event.status === "done" ? "✓" : event.status === "running" ? "⟳" : "✕"}</span>
+        <span style={{ fontSize: "0.53rem", fontWeight: 600, color: c.muted, flexShrink: 0, background: "rgba(255,255,255,0.05)", padding: "1px 4px", borderRadius: 3 }}>{AGENT_LABELS[event.agentId] || event.agentId}</span>
+        <span style={{ fontSize: "0.6rem", color: isPreview ? "#60a5fa" : c.text, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{isPreview ? "index.html (preview)" : event.fileName}</span>
+        {event.preview && <span style={{ fontSize: "0.5rem", color: c.muted, flexShrink: 0 }}>{expanded ? "▲" : "▼"}</span>}
+      </div>
+      {expanded && event.preview && (
+        <div style={{ borderTop: `1px solid ${c.border}`, padding: "0.4rem 0.5rem", fontFamily: "monospace", fontSize: "0.56rem", color: "#a3e635", background: "rgba(0,0,0,0.3)", whiteSpace: "pre-wrap", wordBreak: "break-all", maxHeight: 150, overflowY: "auto", lineHeight: 1.5 }}>
+          {event.preview.slice(0, 400)}{event.preview.length > 400 && "\n...(truncated)"}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// â”€â”€ Intake question card with chip options â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const IntakeQuestionCard = memo(({ q, selected, onSelect, c }) => (
   <div
     style={{
@@ -26,7 +59,7 @@ const IntakeQuestionCard = memo(({ q, selected, onSelect, c }) => (
   >
     <p
       style={{
-        fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+        fontFamily: "var(--font-body)",
         fontSize: "0.83rem",
         fontWeight: 600,
         color: c.text,
@@ -54,7 +87,7 @@ const IntakeQuestionCard = memo(({ q, selected, onSelect, c }) => (
               borderRadius: 20,
               padding: "0.3rem 0.75rem",
               cursor: "pointer",
-              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: "0.77rem",
               transition: "background 0.15s, color 0.15s, border-color 0.15s",
               whiteSpace: "nowrap",
@@ -80,7 +113,7 @@ const IntakeQuestionCard = memo(({ q, selected, onSelect, c }) => (
 ));
 IntakeQuestionCard.displayName = "IntakeQuestionCard";
 
-// ── Main panel ─────────────────────────────────────────────────────────────
+// â”€â”€ Main panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ChatPanel = memo(({
   c,
   messages,
@@ -90,6 +123,7 @@ const ChatPanel = memo(({
   phase = "idle",
   intakeQuestions = [],
   onSubmitIntake,
+  codeEvents = [],
 }) => {
   const [input, setInput]         = useState("");
   const [imageData, setImageData] = useState(null);
@@ -106,6 +140,7 @@ const ChatPanel = memo(({
   // Reset intake state when a new intake round starts
   useEffect(() => {
     if (intakeQuestions.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAnswers({});
       setBrandName("");
       setLogoData(null);
@@ -169,6 +204,10 @@ const ChatPanel = memo(({
 
   const isEmpty = messages.length === 0;
   const showIntake = intakeQuestions.length > 0 && !generating;
+  const inputPlaceholder =
+    phase === "building" ? "Building your website, please wait..." :
+    phase === "done" ? "Request a change — e.g. 'Make the hero taller' or 'Add a gallery section'..." :
+    "Describe the website you want to build...";
 
   return (
     <div
@@ -199,7 +238,7 @@ const ChatPanel = memo(({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+            fontFamily: "var(--font-body)",
             fontSize: "0.88rem",
             color: c.muted,
             pointerEvents: "none",
@@ -235,7 +274,7 @@ const ChatPanel = memo(({
             >
               <p
                 style={{
-                  fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontWeight: 700,
                   fontSize: "0.9rem",
                   color: c.text,
@@ -247,14 +286,14 @@ const ChatPanel = memo(({
               </p>
               <p
                 style={{
-                  fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: "0.8rem",
                   color: c.muted,
                   margin: 0,
                   lineHeight: 1.6,
                 }}
               >
-                Describe the website you want and our AI will ask a few quick questions before building your site — or pick a template to start instantly. You can also drop a reference image.
+                Describe the website you want and our AI will ask a few quick questions before building your site â€” or pick a template to start instantly. You can also drop a reference image.
               </p>
             </div>
 
@@ -262,7 +301,7 @@ const ChatPanel = memo(({
             <div>
               <p
                 style={{
-                  fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: "0.65rem",
                   fontWeight: 600,
                   color: c.muted,
@@ -286,7 +325,7 @@ const ChatPanel = memo(({
                       padding: "0.5rem 0.85rem",
                       cursor: generating ? "default" : "pointer",
                       textAlign: "left",
-                      fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+                      fontFamily: "var(--font-body)",
                       fontSize: "0.8rem",
                       color: c.text,
                       transition: "background 0.15s, border-color 0.15s",
@@ -342,7 +381,7 @@ const ChatPanel = memo(({
                   color: c.text,
                   borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
                   padding: "0.65rem 0.9rem",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: "0.83rem",
                   lineHeight: 1.6,
                   whiteSpace: "pre-wrap",
@@ -355,7 +394,7 @@ const ChatPanel = memo(({
           );
         })}
 
-        {/* ── Intake chip questions ─────────────────────────────────────── */}
+        {/* â”€â”€ Intake chip questions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {showIntake && (
           <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
             {intakeQuestions.map(q => (
@@ -381,7 +420,7 @@ const ChatPanel = memo(({
               }}
             >
               <div>
-                <p style={{ fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontSize: "0.83rem", fontWeight: 600, color: c.text, margin: "0 0 0.4rem" }}>
+                <p style={{ fontFamily: "var(--font-body)", fontSize: "0.83rem", fontWeight: 600, color: c.text, margin: "0 0 0.4rem" }}>
                   Brand / Store Name (Optional)
                 </p>
                 <input
@@ -396,7 +435,7 @@ const ChatPanel = memo(({
                     borderRadius: 8,
                     padding: "0.6rem",
                     color: c.text,
-                    fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+                    fontFamily: "var(--font-body)",
                     fontSize: "0.8rem",
                     outline: "none",
                   }}
@@ -404,7 +443,7 @@ const ChatPanel = memo(({
               </div>
 
               <div>
-                <p style={{ fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", fontSize: "0.83rem", fontWeight: 600, color: c.text, margin: "0 0 0.4rem" }}>
+                <p style={{ fontFamily: "var(--font-body)", fontSize: "0.83rem", fontWeight: 600, color: c.text, margin: "0 0 0.4rem" }}>
                   Logo (Optional)
                 </p>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -417,7 +456,7 @@ const ChatPanel = memo(({
                       borderRadius: 6,
                       padding: "0.4rem 0.8rem",
                       cursor: "pointer",
-                      fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+                      fontFamily: "var(--font-body)",
                       fontSize: "0.75rem",
                     }}
                   >
@@ -448,7 +487,7 @@ const ChatPanel = memo(({
             {/* Progress label */}
             <p
               style={{
-                fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+                fontFamily: "var(--font-body)",
                 fontSize: "0.72rem",
                 color: c.muted,
                 margin: 0,
@@ -458,7 +497,7 @@ const ChatPanel = memo(({
               {Object.keys(answers).filter(k => answers[k] != null).length} / {intakeQuestions.length} answered
             </p>
 
-            {/* Build button — enabled once all answered */}
+            {/* Build button â€” enabled once all answered */}
             <button
               onClick={handleBuildClick}
               disabled={!allAnswered || generating}
@@ -473,7 +512,7 @@ const ChatPanel = memo(({
                 borderRadius: 10,
                 padding: "0.7rem 1rem",
                 cursor: allAnswered && !generating ? "pointer" : "default",
-                fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+                fontFamily: "var(--font-body)",
                 fontSize: "0.85rem",
                 fontWeight: 600,
                 letterSpacing: "-0.01em",
@@ -488,7 +527,7 @@ const ChatPanel = memo(({
                 e.currentTarget.style.opacity = "1";
               }}
             >
-              {allAnswered ? "Build My Website →" : "Select all options above to continue"}
+              {allAnswered ? "Build My Website â†’" : "Select all options above to continue"}
             </button>
           </div>
         )}
@@ -524,6 +563,35 @@ const ChatPanel = memo(({
           </div>
         )}
 
+        {/* Live Code Feed */}
+        {(generating || codeEvents.length > 0) && (
+          <div style={{ marginTop: "0.5rem" }}>
+            <div
+              style={{
+                padding: "0.4rem 0.6rem",
+                background: c.dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+                borderRadius: 8,
+                border: `1px solid ${c.border}`,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.35rem" }}>
+                <span style={{ fontFamily: "var(--font-body)", fontSize: "0.65rem", fontWeight: 600, color: c.text }}>🔧 Live Code Feed</span>
+                {codeEvents.length > 0 && (
+                  <span style={{ fontSize: "0.58rem", color: codeEvents.filter(e => e.status === "done").length === codeEvents.length ? "#4ade80" : "#facc15", fontWeight: 600 }}>
+                    {codeEvents.filter(e => e.status === "done").length} / {codeEvents.length} done
+                  </span>
+                )}
+              </div>
+              <div style={{ maxHeight: 240, overflowY: "auto" }}>
+                {codeEvents.length === 0 && generating && (
+                  <div style={{ fontSize: "0.62rem", color: c.muted, textAlign: "center", padding: "0.4rem" }}>Initializing pipeline...</div>
+                )}
+                {codeEvents.map(event => <CodeEventCard key={event.key} event={event} c={c} />)}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Error banner */}
         {error && (
           <div
@@ -532,7 +600,7 @@ const ChatPanel = memo(({
               border: `1px solid ${c.border}`,
               borderRadius: 8,
               padding: "0.65rem 0.9rem",
-              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: "0.8rem",
               color: c.muted,
             }}
@@ -544,160 +612,22 @@ const ChatPanel = memo(({
         <div ref={bottomRef} />
       </div>
 
-      {/* Input area — hidden while intake chips are visible */}
+      {/* Input area â€” hidden while intake chips are visible */}
       {!showIntake && (
-        <div
-          style={{
-            borderTop: `1px solid ${c.border}`,
-            padding: "0.75rem 0.9rem",
-            display: "flex",
-            flexDirection: "column",
-            gap: "0.6rem",
-            background: c.dark ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.6)",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            flexShrink: 0,
-          }}
-        >
-          {/* Image preview strip */}
-          {imageData && (
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <img
-                src={imageData}
-                alt="attached"
-                style={{
-                  width: 44,
-                  height: 44,
-                  objectFit: "cover",
-                  borderRadius: 6,
-                  border: `1px solid ${c.border}`,
-                }}
-              />
-              <button
-                onClick={() => setImageData(null)}
-                style={{
-                  background: "none",
-                  border: `1px solid ${c.border}`,
-                  borderRadius: 6,
-                  padding: "2px 10px",
-                  color: c.muted,
-                  cursor: "pointer",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
-                  fontSize: "0.72rem",
-                }}
-              >
-                Remove
-              </button>
-            </div>
-          )}
-
-          {/* Textarea + buttons */}
-          <div style={{ display: "flex", gap: "0.5rem", alignItems: "flex-end" }}>
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={generating}
-              rows={2}
-              placeholder={
-                phase === "building" ? "Building your website, please wait…" :
-                phase === "done"     ? "Request a change — e.g. 'Make the hero taller' or 'Add a gallery section'…" :
-                "Describe the website you want to build…"
-              }
-              style={{
-                flex: 1,
-                background: c.dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
-                border: `1px solid ${c.border}`,
-                borderRadius: 10,
-                padding: "0.6rem 0.85rem",
-                fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
-                fontSize: "0.83rem",
-                color: c.text,
-                resize: "none",
-                outline: "none",
-                lineHeight: 1.5,
-                maxHeight: 120,
-                overflowY: "auto",
-              }}
-            />
-
-            {/* Attach image — paperclip SVG */}
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              title="Attach reference image"
-              style={{
-                background: imageData
-                  ? (c.dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)")
-                  : "none",
-                border: `1px solid ${c.border}`,
-                borderRadius: 8,
-                width: 36,
-                height: 36,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                color: c.muted,
-                flexShrink: 0,
-              }}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-              </svg>
-            </button>
-
-            {/* Send — arrow SVG */}
-            <button
-              onClick={handleSubmit}
-              disabled={!input.trim() || generating}
-              style={{
-                background: (input.trim() && !generating)
-                  ? (c.dark ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.88)")
-                  : c.border,
-                color: (input.trim() && !generating)
-                  ? (c.dark ? "#0a0a0a" : "#f5f5f5")
-                  : c.muted,
-                border: "none",
-                borderRadius: 8,
-                width: 36,
-                height: 36,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: (input.trim() && !generating) ? "pointer" : "default",
-                transition: "background 0.2s, color 0.2s",
-                flexShrink: 0,
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="19" x2="12" y2="5"/>
-                <polyline points="5 12 12 5 19 12"/>
-              </svg>
-            </button>
-          </div>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={e => processImageFile(e.target.files?.[0])}
-          />
-
-          <p
-            style={{
-              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
-              fontSize: "0.62rem",
-              color: c.muted,
-              margin: 0,
-              textAlign: "center",
-              letterSpacing: "0.01em",
-            }}
-          >
-            Enter to send · Shift+Enter for new line · Drop an image to attach
-          </p>
-        </div>
+        <AIWebsiteChatInput
+          c={c}
+          inputValue={input}
+          setInputValue={setInput}
+          imageData={imageData}
+          setImageData={setImageData}
+          onAttachFile={processImageFile}
+          onSend={handleSubmit}
+          onKeyDown={handleKeyDown}
+          busy={generating}
+          placeholder={inputPlaceholder}
+          textareaRef={textareaRef}
+          fileInputRef={fileInputRef}
+        />
       )}
     </div>
   );
@@ -705,3 +635,4 @@ const ChatPanel = memo(({
 
 ChatPanel.displayName = "ChatPanel";
 export default ChatPanel;
+

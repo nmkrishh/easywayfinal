@@ -1,38 +1,28 @@
-/**
- * Agent 6 — Payment Agent (Trinity Large)
- * Only runs if structurePlan.payment === true
- * Adds Razorpay checkout to frontend HTML + Express backend code
- */
 import { callAI, MODELS } from "./callAI.js";
 
 const SYSTEM = `You are a payment integration expert.
-Add a complete, production-ready Razorpay checkout flow to the provided
-frontend HTML and backend Express server code.
+Add a complete, production-ready Razorpay checkout flow.
+Output ONLY the two files. No explanations. No comments. No markdown.
 
 Frontend requirements:
-• Load Razorpay checkout.js from CDN: https://checkout.razorpay.com/v1/checkout.js
-• Add purchase buttons to appropriate sections (pricing, product cards, CTA)
-• Implement the Razorpay.open() call with proper options object
-• Handle payment success and failure callbacks with UI feedback
+• Load Razorpay: <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+• Add purchase buttons to pricing/product/CTA sections
+• Implement Razorpay.open() with options object
+• Handle success/failure callbacks with UI feedback
 • Show order confirmation overlay on success
 
 Backend requirements:
-• Add POST /create-order route (Razorpay order creation)
-• Add POST /verify-payment route (signature verification using crypto)
-• Include RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET as config constants at top
-• Include proper error handling
+• POST /create-order (Razorpay order creation)
+• POST /verify-payment (signature verification using crypto)
+• RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET as env vars
+• Proper error handling on both routes
 
-Return BOTH files separated by exactly this delimiter:
+Separator format:
 ===FRONTEND===
 [complete HTML]
 ===BACKEND===
 [complete server.js]`;
 
-/**
- * @param {string} frontendHtml — HTML from Agent 3 (possibly modified by Agent 4/5)
- * @param {string} backendCode  — server.js from Agent 5
- * @returns {Promise<{frontend: string, backend: string}>}
- */
 export async function runPayment(frontendHtml, backendCode) {
   const prompt = `Add Razorpay payment integration to these files.
 
@@ -42,18 +32,13 @@ ${frontendHtml}
 ===EXISTING BACKEND===
 ${backendCode}`;
 
-  const raw = await callAI(
-    MODELS.agentic,
-    [{ role: "user", content: prompt }],
-    SYSTEM,
-  );
+  const raw = await callAI(MODELS.agentic, [{ role: "user", content: prompt }], SYSTEM);
 
-  // Parse the delimiter-separated output
   const frontMatch = raw.match(/===FRONTEND===\s*([\s\S]+?)(?:===BACKEND===|$)/i);
-  const backMatch  = raw.match(/===BACKEND===\s*([\s\S]+?)$/i);
+  const backMatch = raw.match(/===BACKEND===\s*([\s\S]+?)$/i);
 
   return {
     frontend: frontMatch ? frontMatch[1].trim() : frontendHtml,
-    backend:  backMatch  ? backMatch[1].trim()  : backendCode,
+    backend: backMatch ? backMatch[1].trim() : backendCode,
   };
 }

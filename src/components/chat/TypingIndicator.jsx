@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+﻿import React, { memo } from "react";
 
 const TypingIndicator = memo(({ c }) => (
   <div style={{ display: "flex", alignItems: "flex-end", gap: "0.65rem" }}>
@@ -8,7 +8,7 @@ const TypingIndicator = memo(({ c }) => (
       background: c.surface, border: `1px solid ${c.border}`,
       display: "flex", alignItems: "center", justifyContent: "center",
       fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.04em",
-      color: c.muted, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+      color: c.muted, fontFamily: "var(--font-body)",
     }}>AI</div>
 
     <div style={{
@@ -31,3 +31,4 @@ const TypingIndicator = memo(({ c }) => (
 
 TypingIndicator.displayName = "TypingIndicator";
 export default TypingIndicator;
+

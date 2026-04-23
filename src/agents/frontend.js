@@ -1,38 +1,54 @@
-/**
- * Agent 3 — MERN Frontend Agent (MiniMax M2.5)
- * Generates a complete React project (separate components) + CDN preview HTML
- *
- * Output format (must be exact — parsed by parseProjectFiles):
- *
- *   [PREVIEW]
- *   <!DOCTYPE html>...</html>
- *   [/PREVIEW]
- *   [FILE path="client/src/App.jsx"]
- *   ...
- *   [/FILE]
- *   [FILE path="client/src/components/Navbar.jsx"]
- *   ...
- *   [/FILE]
- *   ... (all components)
- */
 import { callAI, MODELS, parseProjectFiles } from "./callAI.js";
 
-const SYSTEM = `You are a world-class Senior React Engineer and UI/UX Designer.
-Build a complete MERN stack frontend as SEPARATE React components.
-This is for a REAL production project — no placeholders, no shortcuts.
+const DESIGN_THEMES = {
+  "bold-energetic": "src/designs/bold-energetic/DESIGN.md",
+  "dark-technical": "src/designs/dark-technical/DESIGN.md",
+  "developer-docs": "src/designs/developer-docs/DESIGN.md",
+  "gradient-modern": "src/designs/gradient-modern/DESIGN.md",
+  "minimal-clean": "src/designs/minimal-clean/DESIGN.md",
+  "vibrant-playful": "src/designs/vibrant-playful/DESIGN.md",
+  "warm-editorial": "src/designs/warm-editorial/DESIGN.md",
+};
+
+const SKILLS_CONTEXT = `
+SKILL CONTEXT — WEBAPP BUILDING (from .antigravity-skills/webapp-building):
+Stack: React 18 + Vite + Tailwind CSS + shadcn/ui
+- Functional components + hooks only (useState, useEffect, useRef, useCallback, useMemo)
+- Separate component files under client/src/components/
+- CSS custom properties on :root for all design tokens
+- React Router v6 for multi-page apps
+- Three.js r128 for 3D backgrounds (import * as THREE from 'three')
+- useEffect cleanup for Three.js: renderer.dispose(), geometry.dispose(), material.dispose()
+- package.json must list all deps: react, react-dom, vite, three, react-router-dom, @vitejs/plugin-react
+- vite.config.js: standard Vite React plugin + path alias @/ → src/
+
+SCRIPTS REFERENCE:
+- init-webapp.sh creates a full React+Vite+Tailwind+shadcn project
+- All components go in src/components/, hooks in src/hooks/, types in src/types/
+- Build output: dist/index.html + dist/assets/[name]-[hash].js + dist/assets/[name]-[hash].css
+`;
+
+function buildSystemPrompt(designBibleContent) {
+  const designSection = designBibleContent
+    ? `\n\n═══════════════════════════════════════════════════════
+ DESIGN BIBLE — FOLLOW EXACTLY AS THE LAW
+═══════════════════════════════════════════════════════
+${designBibleContent}
+═══════════════════════════════════════════════════════`
+    : "";
+
+  return `You are a world-class Senior React Engineer and UI/UX Designer building a REAL production app.
+Pure working code only. Zero comments. Zero explanations. Zero placeholder functions.
+${designSection}
+${SKILLS_CONTEXT}
 
 ═══════════════════════════════════════════════════════
- OUTPUT FORMAT — STRICTLY REQUIRED
+ OUTPUT FORMAT — EXACTLY THIS, NOTHING ELSE
 ═══════════════════════════════════════════════════════
 
-Output EXACTLY in this format with these delimiters:
-
-1. First the CDN preview HTML (runs in iframe without a bundler):
 [PREVIEW]
-<!DOCTYPE html>...complete HTML with React CDN + Babel + ThreeJS...</html>
+<!DOCTYPE html>...complete CDN HTML with React+Babel+Three.js...
 [/PREVIEW]
-
-2. Then each React project file:
 [FILE path="client/src/main.jsx"]
 ...content...
 [/FILE]
@@ -45,7 +61,6 @@ Output EXACTLY in this format with these delimiters:
 [FILE path="client/src/components/Hero.jsx"]
 ...content...
 [/FILE]
-... (ALL components from the plan)
 [FILE path="client/src/styles/globals.css"]
 ...content...
 [/FILE]
@@ -57,89 +72,71 @@ Output EXACTLY in this format with these delimiters:
 [/FILE]
 
 ═══════════════════════════════════════════════════════
- PREVIEW HTML RULES (inside [PREVIEW]...[/PREVIEW])
+ PREVIEW HTML RULES
 ═══════════════════════════════════════════════════════
-• Use React 18 UMD CDN + ReactDOM + Babel standalone + Three.js r128
-• All components inlined in one <script type="text/babel"> block
-• All CSS in a <style> block in <head>
-• Must render in iframe with zero setup
+• React 18 UMD CDN + ReactDOM + Babel standalone + Three.js r128
+• All components in one <script type="text/babel"> block
+• All CSS in <style> in <head>
+• Must run in iframe with zero setup
+• CDN:
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-CDN links to include:
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+MANDATORY UI REQUIREMENTS:
+① Color system: CSS custom properties on :root, follow the design bible colors exactly
+② 3D Hero: Three.js canvas behind hero — torus or icosahedron, slow rotation, mouse parallax. CRITICAL: Double-check syntax when instantiating Three.js classes (e.g., new THREE.WebGLRenderer({ alpha: true });) to ensure all parentheses and curly braces are properly closed.
+③ Scroll animations: IntersectionObserver, .section-reveal, opacity 0→1, translateY(30px)→0
+④ Google Fonts: 2 fonts via <link> — geometric sans for body + expressive for headings, fluid clamp()
+⑤ Micro-interactions: buttons scale(1.03) + box-shadow, cards translateY(-6px), nav underline from center
 
-─── MANDATORY UI FEATURES ────────────────────────────
-
-① MONOCHROME COLOR SYSTEM
-  • Use CSS custom properties on :root
-  • Stick to a clean, professional monochrome palette unless the brand strictly dictates otherwise.
-  • Default: --bg:#0a0a0a; --surface:#111; --border:#222; --text:#f0f0f0; --muted:#888; --accent:#ffffff
-
-② 3D HERO BACKGROUND (Three.js r128)
-  • Create a Three.js canvas behind the hero section
-  • Add a floating 3D geometric shape (torus, sphere, or icosahedron)
-  • Animate with requestAnimationFrame (slow rotation)
-  • Mouse parallax: slight camera offset on mousemove
-  • Use monochrome materials (MeshStandardMaterial, white/grey wireframe)
-
-③ SCROLL ANIMATIONS
-  • IntersectionObserver: every section .section-reveal fades + slides up on enter
-  • CSS: opacity 0 → 1, translateY(30px) → 0, transition 0.6s ease
-  • Stagger children with nth-child delay
-
-④ GOOGLE FONTS
-  • Import 2 fonts via <link> (geometric sans for body + expressive for headings)
-  • Fluid typography with clamp()
-
-⑤ MICRO-INTERACTIONS
-  • Buttons: scale(1.03) + box-shadow on hover
-  • Cards: translateY(-6px) + deeper shadow on hover
-  • Nav links: underline animation from center
-
-─── CONTENT RULES (CRITICAL) ─────────────────────────
-• Use ONLY the brand name and details from the brief + user answers
-• NEVER invent phone numbers, emails, addresses, or prices
-• Use [Phone] [Email] [Address] [Price] as visible placeholders
+CONTENT RULES:
+• Use ONLY the brand name from the brief
+• NEVER invent phone/email/address/prices — use [Phone] [Email] [Address] [Price] labels
 • Images: https://picsum.photos/seed/{keyword}/{w}/{h}
-• Logo: typographic SVG using the exact brand name provided
+• Logo: typographic SVG using exact brand name
 
 ═══════════════════════════════════════════════════════
- REACT PROJECT FILES RULES
+ REACT FILES RULES
 ═══════════════════════════════════════════════════════
-• Use React 18 functional components + hooks (useState, useEffect, useRef)
-• Each component in its own file under client/src/components/
-• Use CSS custom properties (matching the preview's color system)
-• Include Three.js import at top of Hero component: import * as THREE from 'three'
-• Use useEffect with proper cleanup for Three.js (dispose on unmount)
-• All CSS in client/src/styles/globals.css (matches preview CSS variables)
-• React Router v6 for routing (if multi-page)
-• NO TypeScript — plain JSX only
-• package.json must list all dependencies (react, react-dom, vite, three, react-router-dom)
-• vite.config.js with standard Vite React plugin setup
+• React 18 functional components + hooks
+• Each component in its own file
+• CSS custom properties matching the preview color system
+• Hero: import * as THREE from 'three', useEffect cleanup on unmount. CRITICAL: Double-check syntax when instantiating Three.js classes (e.g., new THREE.WebGLRenderer({ alpha: true });) to ensure all parentheses and curly braces are properly closed.
+• All CSS in client/src/styles/globals.css
+• React Router v6 for routing
+• NO TypeScript — plain JSX
+• package.json: all deps listed
+• vite.config.js: standard Vite React plugin
 
 ═══════════════════════════════════════════════════════
- IMPORTANT — OUTPUT NOTHING ELSE
+ CRITICAL: OUTPUT NOTHING ELSE
 ═══════════════════════════════════════════════════════
-No explanations. No markdown. No comments outside the delimiters.
-Start immediately with [PREVIEW] and end with the last [/FILE].`;
+Start immediately with [PREVIEW]. End with the last [/FILE].
+No markdown. No backticks outside file content. No explanations.`;
+}
 
-/**
- * @param {object} plan         — JSON from structurer
- * @param {string} brief        — enhanced brief from enhancer
- * @param {string} [brandName]  — brand name from intake
- * @param {string} [logoData]   — uploaded logo as data URL (optional)
- * @returns {Promise<{ preview: string, files: Record<string,string> }>}
- */
-export async function runFrontend(plan, brief, brandName = "", logoData = "") {
+export async function runFrontend(plan, brief, brandName = "", logoData = "", selectedTheme = "minimal-clean", onFileGenerated = null) {
+  const themePath = DESIGN_THEMES[selectedTheme] || DESIGN_THEMES["minimal-clean"];
+  let designBibleContent = "";
+  try {
+    const resp = await fetch(`/${themePath}`);
+    if (resp.ok) {
+      designBibleContent = await resp.text();
+    }
+  } catch {
+    // intentional
+  }
+
   const logoNote = logoData
-    ? `The user has uploaded a logo. Include it in the Navbar exactly as an <img> tag with src="EASYWAY_INJECTED_LOGO_DATA_URL". Do NOT use picsum for the logo.`
+    ? `User provided a logo. In Navbar, use <img src="EASYWAY_INJECTED_LOGO_DATA_URL" alt="${brandName || plan.brandName} logo" />. Never use picsum for logo.`
     : `Generate a clean typographic SVG logo for "${brandName || plan.brandName || "Brand"}".`;
 
   const prompt = `Build the complete MERN frontend for:
 
-BRAND NAME: ${brandName || plan.brandName || "Not specified"}
+BRAND: ${brandName || plan.brandName || "Not specified"}
+THEME: ${selectedTheme}
 LOGO: ${logoNote}
 
 BRIEF:
@@ -148,26 +145,30 @@ ${brief}
 MERN PROJECT PLAN:
 ${JSON.stringify(plan, null, 2)}
 
-Generate ALL these components as separate files:
+ALL COMPONENTS TO GENERATE AS SEPARATE FILES:
 ${(plan.components || []).join(", ")}
 
-Remember: NEVER invent phone numbers, emails, addresses, or prices.
-Use placeholder labels like [Phone], [Email], [Address] where user data would go.`;
+CRITICAL: YOU MUST GENERATE A SEPARATE FILE FOR EVERY COMPONENT LISTED ABOVE. Do not skip any sections. Specifically ensure the Footer and Navbar are included and implemented fully.
 
-  let raw = await callAI(
-    MODELS.primary,
-    [{ role: "user", content: prompt }],
-    SYSTEM,
-  );
+CRITICAL: NEVER invent phone, email, address, or prices. Use [Phone] [Email] [Address] labels.`;
 
-  // Re-inject the massive base64 logo data back into the raw output to bypass AI token limits
+  if (onFileGenerated) onFileGenerated("frontend", "preview", "Generating CDN preview HTML...", "running");
+
+  let raw = await callAI("minimax/minimax-m2.5:free", [{ role: "user", content: prompt }], buildSystemPrompt(designBibleContent));
+
   if (logoData) {
     raw = raw.replace(/EASYWAY_INJECTED_LOGO_DATA_URL/g, logoData);
   }
 
   const parsed = parseProjectFiles(raw);
 
-  // Fallback if delimiter parsing failed — treat entire output as preview
+  if (onFileGenerated && parsed.files) {
+    for (const [filePath, content] of Object.entries(parsed.files)) {
+      onFileGenerated("frontend", filePath, content, "done");
+    }
+    if (parsed.preview) onFileGenerated("frontend", "[PREVIEW]", parsed.preview, "done");
+  }
+
   if (!parsed.preview && !Object.keys(parsed.files).length) {
     const { extractHtml } = await import("./callAI.js");
     return { preview: extractHtml(raw), files: {} };
@@ -176,24 +177,27 @@ Use placeholder labels like [Phone], [Email], [Address] where user data would go
   return parsed;
 }
 
-/**
- * runFrontendEdit — Chatbot iterative RAG editor
- * @param {string} existingPreview 
- * @param {Record<string,string>} existingFiles
- * @param {string} changeRequest
- * @param {string} brandName
- * @param {string} logoData
- */
-export async function runFrontendEdit(existingPreview, existingFiles, changeRequest, brandName = "", logoData = "") {
+export async function runFrontendEdit(existingPreview, existingFiles, changeRequest, brandName = "", logoData = "", selectedTheme = "minimal-clean") {
+  const themePath = DESIGN_THEMES[selectedTheme] || DESIGN_THEMES["minimal-clean"];
+  void brandName; // intentional
+  let designBibleContent = "";
+  try {
+    const resp = await fetch(`/${themePath}`);
+    if (resp.ok) {
+      designBibleContent = await resp.text();
+    }
+  } catch {
+    // intentional
+  }
+
   let fileContext = "";
   for (const [path, content] of Object.entries(existingFiles)) {
-    if (path.startsWith("client/")) { // Only send frontend files into context
+    if (path.startsWith("client/")) {
       fileContext += `\n[FILE path="${path}"]\n${content}\n[/FILE]`;
     }
   }
 
-  const prompt = `You previously generated this React frontend site.
-The user wants you to act like a chatbot modifying the existing code based on their request.
+  const prompt = `Modify the existing React frontend based on the user request.
 
 USER CHANGE REQUEST:
 "${changeRequest}"
@@ -206,16 +210,11 @@ ${existingPreview}
 EXISTING REACT FILES:
 ${fileContext}
 
-Based on their request, regenerate the FULL modified HTML preview AND all the required React files.
-Keep the exact same strict output delimiters ([PREVIEW] ... [/PREVIEW] and [FILE path="..."]).
-Only change what is requested, keeping the design consistent unless told otherwise.
-If they ask for UI iterations, integrate them seamlessly into the monochrome aesthetic.`;
+Regenerate the FULL modified HTML preview AND all required React files.
+Keep the exact same strict output delimiters ([PREVIEW]...[/PREVIEW] and [FILE path="..."]).
+Only change what is requested. Keep the design system consistent unless told otherwise.`;
 
-  let raw = await callAI(
-    MODELS.primary,
-    [{ role: "user", content: prompt }],
-    SYSTEM
-  );
+  let raw = await callAI("minimax/minimax-m2.5:free", [{ role: "user", content: prompt }], buildSystemPrompt(designBibleContent));
 
   if (logoData) {
     raw = raw.replace(/EASYWAY_INJECTED_LOGO_DATA_URL/g, logoData);
@@ -228,7 +227,6 @@ If they ask for UI iterations, integrate them seamlessly into the monochrome aes
     return { preview: extractHtml(raw), files: existingFiles };
   }
 
-  // Merge the updated frontend files with any files the agent didn't touch
   const mergedFiles = { ...existingFiles };
   for (const [path, content] of Object.entries(parsed.files)) {
     mergedFiles[path] = content;
